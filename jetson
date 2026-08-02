@@ -1,0 +1,17 @@
+LAN:
+username: jetson-nano-ra
+host: 192.168.1.233
+
+WIFI (ido's):
+username: jetson-nano-ra
+host: 10.100.102.18
+
+DIRECT - LAN:
+// establish profile (if not elready)
+nmcli connection add type ethernet ifname enx00e04cee0299 con-name "jetson-direct" ipv4.method manual ipv4.addresses 192.168.1.100/24
+
+// (alternativly - also allowing the jetson internet access)
+sudo nmcli connection modify jetson-direct ipv4.method shared
+
+// activate it
+nmcli connection up "jetson-direct"
