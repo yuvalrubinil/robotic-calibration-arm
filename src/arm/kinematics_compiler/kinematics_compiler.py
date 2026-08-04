@@ -84,3 +84,34 @@ class KinematicsCompiler:
             2: math.degrees(theta2),
             3: math.degrees(theta3)
         }
+
+    def compile_from_file(self, input_filepath, output_filepath):
+        """
+        Reads a text file containing targets formatted as (radius, theta, height).
+        Computes the inverse kinematics for each line and writes the results to an output file.
+        """
+        with open(input_filepath, 'r') as infile, open(output_filepath, 'w') as outfile:
+            for line in infile:
+                line = line.strip()
+                if not line:
+                    continue
+                
+                # Strip parentheses and split by comma
+                clean_line = line.replace('(', '').replace(')', '')
+                parts = clean_line.split(',')
+                
+                if len(parts) == 3:
+                    try:
+                        radius = float(parts[0].strip())
+                        theta = float(parts[1].strip())
+                        height = float(parts[2].strip())
+                        
+                        # Calculate IK
+                        ik_result = self.calculate_ik(radius, theta, height)
+                        
+                        # Write result dictionary to file
+                        outfile.write(f"{ik_result}\n")
+                    except ValueError:
+                        outfile.write(f"Error processing values: {line}\n")
+                else:
+                    outfile.write(f"Invalid format (expected 3 values): {line}\n")
