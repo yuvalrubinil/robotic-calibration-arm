@@ -1,7 +1,7 @@
 {
-  "shoulder_arm": ?,
-  "elbow_arm": ?,
-  "wrist_arm": ?,
-  "yaw_arm": ?,
-  "board_height": ?
+  "shoulder_arm": 0,
+  "elbow_arm": 0,
+  "wrist_arm": 0,
+  "yaw_arm": 0,
+  "board_height": 0
 }

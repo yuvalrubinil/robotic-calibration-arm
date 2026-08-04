@@ -1,5 +1,5 @@
 {
-    "0": { "name": "base", "type": "DS3218", "logical_zero": ?, "operating_range": [-? , ?]},
+    "0": { "name": "base", "type": "DS3218", "logical_zero": 0, "operating_range": [0 , 0]},
     "1": { "name": "shoulder", "type": "DS3218", "logical_zero": 135, "operating_range": [-60, 135] },
     "2": { "name": "elbow", "type": "DS3218", "logical_zero": 135, "operating_range": [-135 , 135] },
     "3": { "name": "wrist", "type": "DS3218", "logical_zero": 135, "operating_range": [-120 , 120] },
