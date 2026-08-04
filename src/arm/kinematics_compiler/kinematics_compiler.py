@@ -3,7 +3,18 @@ import math
 import os
 
 class KinematicsCompiler:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(KinematicsCompiler, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
     def __init__(self, lengths_file=None):
+        if getattr(self, '_initialized', False):
+            return
+        
         if lengths_file is None:
             # Default to the lenghts.json in the parent directory
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -11,6 +22,8 @@ class KinematicsCompiler:
             
         with open(lengths_file, "r") as f:
             self.lengths = json.load(f)
+            
+        self._initialized = True
 
     def calculate_ik(self, radius, theta, height):
         """
