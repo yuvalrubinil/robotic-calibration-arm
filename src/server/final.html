@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BaselineX</title>
+    <style>
+        table {
+            width: 100%;
+        }
+        th, td {
+            width: 33%;
+            vertical-align: top;
+        }
+    </style>
+</head>
+
+<body>
+    <form method="POST" id="setup_form">
+        <table>
+            <tr>
+                <th>BaselineX</th>
+            </tr>
+            <tr>
+                <td>
+                    
+                        <div>
+                            <input type="checkbox" id="focus_left_camera" name="focus_left_camera" checked  onchange="this.form.submit()">
+            
+                            
+                                <button type="button" onclick="startOperation('focus_left_camera')">Focus Left Camera</button>
+                            
+
+                            <label for="focus_left_camera">test camera focus</label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="left_lens_calibration" name="left_lens_calibration" checked  onchange="this.form.submit()">
+            
+                            
+                                <button type="button" onclick="startOperation('left_lens_calibration')">Left Lens Calibration</button>
+                            
+
+                            <label for="left_lens_calibration"></label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="left_ledstrip" name="left_ledstrip" checked  onchange="this.form.submit()">
+            
+                            
+                                <button type="button" onclick="startOperation('left_ledstrip')">Left Ledstrip</button>
+                            
+
+                            <label for="left_ledstrip"></label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="left_speaker" name="left_speaker" checked  onchange="this.form.submit()">
+            
+                            
+                                <button type="button" onclick="startOperation('left_speaker')">Left Speaker</button>
+                            
+
+                            <label for="left_speaker"></label>
+                        </div>
+                    
+                </td>
+                
+                <td>
+                    
+                        <div>
+                            <input type="checkbox" id="focus_right_camera" name="focus_right_camera" checked  onchange="this.form.submit()">
+            
+                            
+                                <button type="button" onclick="startOperation('focus_right_camera')">Focus Right Camera</button>
+                            
+                            
+                            <label for="focus_right_camera">test camera focus</label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="right_lens_calibration" name="right_lens_calibration" checked  onchange="this.form.submit()">
+            
+                            
+                                <button type="button" onclick="startOperation('right_lens_calibration')">Right Lens Calibration</button>
+                            
+                            
+                            <label for="right_lens_calibration"></label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="right_ledstrip" name="right_ledstrip" checked  onchange="this.form.submit()">
+            
+                            
+                                <button type="button" onclick="startOperation('right_ledstrip')">Right Ledstrip</button>
+                            
+                            
+                            <label for="right_ledstrip"></label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="right_speaker" name="right_speaker" checked  onchange="this.form.submit()">
+            
+                            
+                                <button type="button" onclick="startOperation('right_speaker')">Right Speaker</button>
+                            
+                            
+                            <label for="right_speaker"></label>
+                        </div>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    
+                        <div>
+                            <input type="checkbox" id="button_charging_led" name="button_charging_led" checked  onchange="this.form.submit()">
+            
+                            
+
+                            
+                            
+                            <label for="button_charging_led">did the charging led turn on before the camera turned on?</label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="power_led" name="power_led" checked  onchange="this.form.submit()">
+            
+                            
+                                <button type="button" onclick="startOperation('power_led')">Power Led</button>
+                            
+
+                            
+                            
+                            <label for="power_led"></label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="fan" name="fan" checked  onchange="this.form.submit()">
+            
+                            
+
+                            
+                                <button type="button" onclick="startOperation('fan_5')">Fan 5%</button>
+                                <button type="button" onclick="startOperation('fan_100')">Fan 100%</button>
+                                <button type="button" onclick="startOperation('fan_auto')">Restore fan auto</button>
+                            
+                            
+                            <label for="fan">fan</label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="external_power_supply" name="external_power_supply"   onchange="this.form.submit()">
+            
+                            
+
+                            
+                            
+                            <label for="external_power_supply">external power supply - plug external power and disconnect battery</label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="battery_power_supply" name="battery_power_supply"   onchange="this.form.submit()">
+            
+                            
+
+                            
+                            
+                            <label for="battery_power_supply">battery power supply - connect battery and unplug external power supply</label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="battery_charging" name="battery_charging" checked  onchange="this.form.submit()">
+            
+                            
+
+                            
+                            
+                            <label for="battery_charging">charging - plug external power with battery</label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="ambient_light_sensors" name="ambient_light_sensors" checked  onchange="this.form.submit()">
+            
+                            
+
+                            
+                            
+                            <label for="ambient_light_sensors">ambient light sensors</label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="simulator_test" name="simulator_test"   onchange="this.form.submit()">
+            
+                            
+
+                            
+                            
+                            <label for="simulator_test">After setting ID - test app freestyle in simulator mode. make sure calibration success and strip led lights on when stroke detected.</label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="erase_test_movies" name="erase_test_movies"   onchange="this.form.submit()">
+            
+                            
+                                <button type="button" onclick="startOperation('erase_test_movies')">Erase Test Movies</button>
+                            
+
+                            
+                            
+                            <label for="erase_test_movies">clear test data from camera</label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="JetPack_installed" name="JetPack_installed" checked  onchange="this.form.submit()">
+            
+                            
+
+                            
+                            
+                            <label for="JetPack_installed">JetPack 5.1.2 installed</label>
+                        </div>
+                    
+                        <div>
+                            <input type="checkbox" id="DeepStream_installed" name="DeepStream_installed" checked  onchange="this.form.submit()">
+            
+                            
+
+                            
+                            
+                            <label for="DeepStream_installed">DeepStream 6.3 installed</label>
+                        </div>
+                    
+                </td>
+            </tr>
+        </table>
+        <div id="info"></div>
+        <div id="info2"></div>
+
+        
+    </form>
+    
+    <button onclick="closewindow()">Close</button>
+    <button onclick="cleardata()">Clear</button>
+    <button onclick="stream()">Cameras stream</button>
+    <p id="set_id"><input type="text" id="id" value="" placeholder="100"> <button id="id_button" onclick="setId()" >Set ID</button></p>
+    
+    
+    <div style="position: relative; width: 100%; padding-bottom: 60%;">
+        <iframe id="camera" style="position: absolute; width: 100%; height: 100%; left: 0; top: 0; border:0cap;" src=""></iframe>
+    </div>
+    
+
+    <script>
+        // Detect if we're accessed via proxy (/baselinex/...) or directly on port 4000
+        // This determines which paths to use for API calls and redirects
+        // Note: no trailing slash to match both /baselinex and /baselinex/...
+        var isViaProxy = window.location.pathname.startsWith('/baselinex');
+        
+        // Path prefix: '/baselinex' when via proxy, '' when direct
+        var pathPrefix = isViaProxy ? '/baselinex' : '';
+        
+        // For redirects to other services (lens calibration on port 5000)
+        // Via proxy: use /lens/... path on same origin
+        // Direct: use port 5000 directly
+        var lensBase = isViaProxy ? window.location.origin + '/lens' : 'http://' + window.location.hostname + ':5000';
+        
+        // For redirects back to CameraServer (port 80)
+        // Via proxy: same origin
+        // Direct: need to specify port 80 explicitly (or default)
+        var mainServerBase = isViaProxy ? window.location.origin : 'http://' + window.location.hostname;
+        
+        console.log('Access mode:', isViaProxy ? 'via proxy' : 'direct', '| pathPrefix:', pathPrefix);
+        
+        // set "id" element value tochecklist['CAMERA_ID'] 
+        document.getElementById('id').value = "100";
+
+        //if url is /core hide set_id item
+        if(window.location.pathname == '/core' || window.location.pathname == '/baselinex/core'){
+            document.getElementById('set_id').style.display = 'none';
+        }
+
+        function parse_battery(status){
+            document.getElementById('info').innerHTML = status;
+
+            batt = JSON.parse(status);
+
+            if(!document.getElementById('external_power_supply').checked &&batt['external_power'] && !batt['battery_connected']){
+                // check power_supply checkbox
+                document.getElementById('external_power_supply').checked = true;
+                
+            }
+            if(!document.getElementById('battery_power_supply').checked && batt['battery_connected'] && !batt['external_power']){
+                document.getElementById('battery_power_supply').checked = true;
+            }
+            if(!document.getElementById('battery_charging').checked && batt['battery_connected'] && batt['external_power'] && parseFloat(batt['current']) >= 0){
+                document.getElementById('battery_charging').checked = true;
+            }
+            if(!document.getElementById('ambient_light_sensors').checked && batt['ambient_light'] && batt['ambient_light'][0] > 0 && batt['ambient_light'][1] > 0){
+                document.getElementById('ambient_light_sensors').checked = true;
+                // Create and dispatch the event
+                var event = new Event('change', {
+                    'bubbles': true,
+                    'cancelable': true
+                });
+                document.getElementById('ambient_light_sensors').dispatchEvent(event);
+                
+               
+            }
+
+
+        }
+
+        function parse_jtop(status){
+            document.getElementById('info2').innerHTML = status;
+
+            jtop = JSON.parse(status);
+
+            if(jtop['Fanpwmfan0'] > 0){
+                document.getElementById('fan').checked = true;
+            }
+            else{
+                document.getElementById('fan').checked = false;
+            }
+        }
+
+        function closewindow(){
+            fetch(pathPrefix + '/close');
+            location.href = mainServerBase + "/dev";
+        }
+
+        function stream(){
+            // Use proxy path or direct port based on access mode
+            location.href = isViaProxy ? (window.location.origin + "/baselinex/both") : '/both';
+        }
+
+        function startOperation(item) {
+            // Implement the function to start operation on the element.
+            // This will be dependent on your specific IoT setup.
+
+            // show the operation in the info div
+            document.getElementById('info').innerHTML = 'Start operation on ' + item;
+            console.log('Start operation on ' + item);
+
+
+            // item is right_camera set the source of the iframe to the camera stream
+            // Use pathPrefix to work both via proxy and direct access
+            if (item == 'right_camera') {
+                document.getElementById('camera').src = pathPrefix + '/right';
+            }
+            else if (item == 'left_camera') {
+                document.getElementById('camera').src = pathPrefix + '/left';
+            }
+            else if (item == 'focus_right_camera') {
+                document.getElementById('camera').src = pathPrefix + '/focus_right';
+            }
+            else if (item == 'focus_left_camera') {
+                document.getElementById('camera').src = pathPrefix + '/focus_left';
+            }
+            else if(item == 'power_supply'){
+                fetch('power').then(response => response.text()).then(text => document.getElementById('info').innerHTML = text);
+            }
+            else if(item == 'erase_test_movies'){
+                if (confirm("are you sure you want to delete all?")) {
+                fetch(mainServerBase + "/clear_data");
+                }
+            }
+            else if(item == 'left_lens_calibration'){
+                fetch(mainServerBase + "/lens_calibration");
+                location.href = lensBase + "/left";
+            }
+            else if(item == 'right_lens_calibration'){
+                fetch(mainServerBase + "/lens_calibration");
+                location.href = lensBase + "/right";
+            }
+            else if(item == 'fan_5' || item == 'fan_100' || item == 'fan_auto'){
+                fetch(pathPrefix + '/start_operation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'item=' + encodeURIComponent(item),
+                }).then(response => response.json()).then(result => {
+                    document.getElementById('info').innerHTML = result.status == 'ok'
+                        ? (item == 'fan_auto' ? 'Automatic fan profile restored' : 'Fan set to ' + result.speed + '%. PM2 jtop_server is stopped while testing.')
+                        : 'Fan test failed: ' + result.message;
+                }).catch(error => {
+                    document.getElementById('info').innerHTML = 'Fan test failed: ' + error;
+                });
+            }
+            else{
+                fetch(pathPrefix + '/start_operation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'item=' + encodeURIComponent(item),
+                }).catch(error => console.error('Error:', error))
+            }
+
+           
+
+        }
+
+        function cleardata(){
+            fetch(pathPrefix + '/clear');
+            //reset form
+            
+
+            
+            //sleep fo 1 second
+
+            setTimeout(function() {
+                //refresh
+                location.href = window.location.pathname ;
+            }, 1000); // 2000 milliseconds = 2 seconds
+            
+            
+
+        }
+        
+        function setId() {
+            fetch(pathPrefix + '/set_id?id=' + document.getElementById('id').value);
+        }
+
+        //main loop
+        setInterval(function() {
+            fetch('power').then(response => response.text()).then(text => parse_battery(text));
+
+           // fetch('http://' + window.location.hostname + ':65432').then(response => response.text()).then(text => parse_jtop(text));
+
+        }, 1000);
+            
+    </script>
+    
+</body>
+</html>

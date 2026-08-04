@@ -1,0 +1,8 @@
+{
+  "shoulder_arm": 0.047,
+  "elbow_arm": 0.073,
+  "wrist_arm": 0.019,
+  "board_holder": 0.02,
+  "MG996R_servo": 0.056,
+  "DS3218_servo": 0.068
+}
