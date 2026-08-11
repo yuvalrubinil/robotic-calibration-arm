@@ -26,7 +26,7 @@ class IKCompiler:
         # camera lenses
         self.left_lens = Lens(lenses['left_lens'])
         self.right_lens = Lens(lenses['right_lens'])
-        self.lens = self.right_lens
+        self.lens = self.left_lens
 
         # positions
         self.base_position = np.array(servos["0"]["position"], dtype=float)
@@ -50,11 +50,15 @@ class IKCompiler:
 
         return target_position
 
-    def calc_wrist_angle(self, r, h, perpendicular_2_ground=True):
-        if perpendicular_2_ground:
-            return 180
+    def calc_wrist_angle(self, r, h, elbow_angle, perpendicular=True):
+        if perpendicular:
+            wrist_angle = 90 - elbow_angle
+            return wrist_angle
         else:
-            pass
+            lens_2_target_z_angle = math.degrees(math.atan(h / r))
+            angle_complete = 90 - (lens_2_target_z_angle)
+            wrist_angle = angle_complete - elbow_angle
+            return wrist_angle
 
     def calc_yaw_and_base_angles(self, target_pos):
         # calc all vectors and positions
@@ -128,26 +132,25 @@ class IKCompiler:
     def calc_angle_config(self, r, theta, h, roll_angle=0.0, wrist_perpendicular_2_ground=True):
         target_pos = self.calc_target_position(r, theta, h)
 
-        wrist_angle = self.calc_wrist_angle(r, h, wrist_perpendicular_2_ground)
 
         angles, wrist_pos = self.calc_yaw_and_base_angles(target_pos)
         yaw_angle, base_angle = angles
         wrist_x, wrist_y = wrist_pos
         wrist_pos = self.calc_wrist_position(target_pos, wrist_x, wrist_y)
         shoulder_angle, elbow_angle = self.calc_shoulder_and_elbow_angles(wrist_pos)
-
+        wrist_angle = self.calc_wrist_angle(r, h, elbow_angle, wrist_perpendicular_2_ground)
         angle_config = [base_angle, shoulder_angle, elbow_angle, wrist_angle, yaw_angle, roll_angle]
         servo_angle_config = self.to_servo_angels(angle_config)
         return servo_angle_config
 
 
     def to_servo_angels(self, angle_config):
-        base_angle, shoulder_angle, elbow_angle, _, yaw_angle, roll_angle = angle_config
+        base_angle, shoulder_angle, elbow_angle, wrist_angle, yaw_angle, roll_angle = angle_config
         
         servo_base_angle = round(base_angle + (self.base_logical_zero - 90))
         servo_shoulder_angle = round(shoulder_angle + self.shoulder_logical_zero)
         servo_elbow_angle = round(self.elbow_logical_zero + elbow_angle)
-        servo_wrist_angle = round(self.wrist_logical_zero - elbow_angle)
+        servo_wrist_angle = round(self.wrist_logical_zero - wrist_angle)
         servo_yaw_angle = round(yaw_angle + self.yaw_logical_zero)
         servo_roll_angle = round(roll_angle)
 
