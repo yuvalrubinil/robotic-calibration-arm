@@ -1,0 +1,194 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, angles, quotes, calc}
+
+\title{\texttt{IKCompiler.calc\_yaw\_and\_base\_angles()}}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+\vspace{-3em}
+
+\begin{center}
+\resizebox{!}{0.48\textheight}{%
+\begin{tikzpicture}[
+    >=Stealth,
+    pt/.style={circle, fill, inner sep=1.3pt},
+    lbl/.style={font=\small},
+    ra/.style={gray!20!black}
+]
+    \draw[gray!35, thin] (-1.0,-0.6) -- (7.0,-0.6);
+    \draw[gray!35, thin] (-1.0,-0.6) -- (-1.0,8.7);
+
+    \coordinate (L) at (6.25, 2.60);
+    \coordinate (T) at (3.00, 6.40);
+    \coordinate (Y) at (4.25, 7.47);
+    \coordinate (B) at (0, 0);
+    \coordinate (Q) at (2.68, 8.00);
+
+    \draw[dashed, gray!70] (L) -- (T);
+    \node[pt, blue!60!black] at (L) {};
+    \node[lbl, below=2pt] at (L) {$\mathbf l$};
+    \node[pt, red!70!black] at (T) {};
+    \node[lbl, below right=1pt] at (T) {$\mathbf t$};
+
+    \draw[->, thick, teal!70!black] (Y) -- (T) node[midway, below right=-1pt, lbl, teal!70!black] {$\mathbf v$};
+    \node[pt, teal!70!black] at (Y) {};
+    \node[lbl, right=2pt] at (Y) {$\mathbf y$};
+
+    \coordinate (ra1a) at ($(T)!0.4cm!(L)$);
+    \coordinate (ra1b) at ($(T)!0.4cm!(Y)$);
+    \draw[ra] (ra1a) -- ($(ra1a)+(ra1b)-(T)$) -- (ra1b);
+
+    \draw[teal!50] (Y) circle (1.65);
+
+    \node[pt, violet!70!black] at (B) {};
+    \node[lbl, below right=2pt] at (B) {$\mathbf b$};
+
+    \draw[violet!60!black, thick] (B) -- (Q);
+    \draw[->, orange!80!black, thin] (Y) -- (Q);
+
+    \coordinate (ra2a) at ($(Q)!0.4cm!(B)$);
+    \coordinate (ra2b) at ($(Q)!0.4cm!(Y)$);
+    \draw[ra] (ra2a) -- ($(ra2a)+(ra2b)-(Q)$) -- (ra2b);
+
+    \node[pt, orange!80!black] at (Q) {};
+    \node[lbl, above right=1pt, orange!80!black] at (Q) {$Q$};
+
+    \pic[draw, teal!70!black, angle radius=8mm, angle eccentricity=1.5, "$\beta$" ] {angle = Q--Y--T};
+
+    \coordinate (Bref) at (2.5, 0);
+    \pic[draw, violet!60!black, angle radius=9mm, angle eccentricity=1.4, "$\theta$"] {angle = Bref--B--Q};
+
+\end{tikzpicture}}
+\end{center}
+
+\noindent
+$\mathbf v \perp \mathbf l\mathbf t$ at $\mathbf t$. $\mathbf b Q \perp \mathbf y Q$ at $Q$ --
+the tangency condition, Eq.~\eqref{eq:tangent}. Teal circle: radius $L_2$ about $\mathbf y$.
+
+\section{Setup}
+
+\begin{align*}
+\mathbf b &= \texttt{base\_position}, \quad
+\mathbf l = \texttt{lens.position}, \quad
+\mathbf t = \texttt{target\_pos} &&\in \mathbb R^3\\
+L_2 &= \texttt{L2}
+\end{align*}
+
+Only the $xy$-projections matter below; write $\mathbf b,\mathbf l,\mathbf t,\mathbf y$ for them
+from here on.
+
+\section{Yaw Axis Position}
+
+\begin{align}
+\mathbf d &= \mathbf t - \mathbf l, \qquad
+\hat{\mathbf n} = \frac{(-d_y,\ d_x)}{\lVert \mathbf d \rVert} \\
+\mathbf v &= L_2\, \hat{\mathbf n}, \qquad
+\mathbf y = \mathbf t - \mathbf v
+\end{align}
+
+\section{Tangent Condition}
+
+\begin{equation}
+\mathbf v_r(\beta) = R(\beta)\,\mathbf v, \qquad
+Q(\beta) = \mathbf y + \mathbf v_r(\beta), \qquad
+R(\beta) = \begin{bmatrix}\cos\beta & -\sin\beta \\ \sin\beta & \cos\beta\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\label{eq:tangent}
+\raisebox{-0.5\height}{\tikz \node[draw=teal!70!black, line width=1.4pt, rounded corners=3pt,
+fill=teal!8, inner sep=14pt]
+{\Large $\displaystyle \mathbf v_r(\beta)\cdot\big(Q(\beta) - \mathbf b\big) = 0$};}
+\end{equation}
+radius $\mathbf y Q(\beta) \perp$ tangent $\mathbf b Q(\beta)$: $\mathbf v_r(\beta)$, the rotated
+offset, is perpendicular to the line from the base to the point it lands on.
+
+\section{Solving \eqref{eq:tangent}}
+
+Write $\mathbf w = \mathbf y - \mathbf b$. Since $\lVert\mathbf v_r(\beta)\rVert = \lVert\mathbf v\rVert = L_2$
+for every $\beta$:
+\begin{align}
+\mathbf v_r(\beta)\cdot\big(Q(\beta)-\mathbf b\big)
+&= \mathbf v_r(\beta)\cdot\big(\mathbf w + \mathbf v_r(\beta)\big)
+ = \mathbf v_r(\beta)\cdot\mathbf w + L_2^2 \; = \; 0 \\[2pt]
+\Longrightarrow\quad \mathbf v_r(\beta)\cdot\mathbf w &= -L_2^2
+\end{align}
+Substitute $\mathbf v_r(\beta) = (v_x\cos\beta - v_y\sin\beta,\ v_x\sin\beta + v_y\cos\beta)$ and
+group by $\cos\beta,\sin\beta$:
+\begin{align}
+\mathbf v_r(\beta)\cdot\mathbf w
+&= (v_x\cos\beta - v_y\sin\beta)\,w_x + (v_x\sin\beta + v_y\cos\beta)\,w_y \\
+&= \underbrace{(v_xw_x + v_yw_y)}_{A}\cos\beta \;+\; \underbrace{(v_xw_y - v_yw_x)}_{B}\sin\beta
+\end{align}
+i.e.\ $A\cos\beta + B\sin\beta = C$ with
+\begin{equation}
+A = v_x w_x + v_y w_y, \qquad
+B = v_x w_y - v_y w_x, \qquad
+C = -L_2^2.
+\end{equation}
+
+\section{Closed Form}
+
+Divide $A\cos\beta + B\sin\beta = C$ through by $R := \sqrt{A^2+B^2}$:
+\begin{equation}
+\frac{A}{R}\cos\beta + \frac{B}{R}\sin\beta = \frac{C}{R}
+\end{equation}
+$(A/R,\,B/R)$ is a unit vector, so it is $(\cos\varphi,\sin\varphi)$ for some $\varphi$ --
+read off directly as $\varphi = \operatorname{atan2}(B,A)$:
+\begin{equation}
+\cos\varphi = \frac{A}{R}, \qquad \sin\varphi = \frac{B}{R}
+\end{equation}
+Substituting turns the left side into the cosine angle-difference identity:
+\begin{equation}
+\cos\varphi\cos\beta + \sin\varphi\sin\beta = \cos(\beta - \varphi) = \frac{C}{R}
+\end{equation}
+Real solutions exist iff $|C| \le R$ (else $\mathbf b$ is unreachable by a tangent from this
+circle). Isolating $\beta$:
+\begin{equation}
+\beta - \varphi = \pm\arccos\!\left(\frac{C}{R}\right)
+\end{equation}
+\begin{equation}
+\boxed{\ \beta = \varphi \pm \arccos\!\left(\frac{C}{R}\right)\ }
+\end{equation}
+
+\section{Base Angle}
+
+\begin{equation}
+Q = \mathbf y + \mathbf v_r(\beta), \qquad
+\theta = \operatorname{atan2}(Q_y - b_y,\ Q_x - b_x)
+\end{equation}
+
+The two signs give two $(\beta,\theta)$ pairs; duplicates are dropped and the pair closest to
+world heading $0^\circ$ is returned first.
+
+\section{Notation $\leftrightarrow$ Code}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Symbol & Variable \\
+\midrule
+$\mathbf b$ & \texttt{base\_position} / \texttt{base\_xy} \\
+$\hat{\mathbf n}$ & \texttt{lens\_2\_target\_perpenducular\_vec} \\
+$\mathbf v$ & \texttt{l2\_translation\_vec} \\
+$\mathbf y$ & \texttt{yaw\_axis\_position} \\
+$A,B,C$ & \texttt{A}, \texttt{B}, \texttt{C} \\
+$R,\varphi$ & \texttt{R}, \texttt{phi} \\
+$\beta$ & \texttt{beta} \\
+$\mathbf v_r$ & \texttt{v\_r} \\
+$Q$ & \texttt{q} \\
+$\theta$ & \texttt{base\_angle} \\
+$(\beta,\theta)$ pairs & \texttt{solutions} / \texttt{unique\_solutions} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

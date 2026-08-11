@@ -1,0 +1,77 @@
+{
+    "arm": {
+        "servos": {
+            "types": {
+                "DS3218": {
+                    "range": 270,
+                    "min_pulse": 500,
+                    "max_pulse": 2500
+                },
+                "MG996R": {
+                    "range": 180,
+                    "min_pulse": 500,
+                    "max_pulse": 2500
+                }
+            },
+            "0": {
+                "name": "base",
+                "type": "DS3218",
+                "logical_zero": 140,
+                "operating_range": [10, 270],
+                "position": [0, 0, 12.45]
+            },
+            "1": {
+                "name": "shoulder",
+                "type": "DS3218",
+                "logical_zero": 135,
+                "operating_range": [-60, 135],
+                "position": [0, 0, 16.2]
+            },
+            "2": {
+                "name": "elbow",
+                "type": "DS3218",
+                "logical_zero": 135,
+                "operating_range": [-135, 135]
+            },
+            "3": {
+                "name": "wrist",
+                "type": "DS3218",
+                "logical_zero": 135,
+                "operating_range": [-120, 120]
+            },
+            "4": {
+                "name": "yaw",
+                "type": "MG996R",
+                "logical_zero": 85,
+                "operating_range": [-85, 85]
+            },
+            "5": {
+                "name": "roll",
+                "type": "MG996R",
+                "logical_zero": 90,
+                "operating_range": [-90, 30]
+            }
+        },
+        "lengths": {
+            "shoulder_arm": 10,
+            "elbow_arm": 14.75,
+            "wrist_arm": 7,
+            "L3": 2.5,
+            "L2": 1.65,
+            "L1": 0
+        }
+    },
+    "camera": {
+        
+        "lenses": {
+            "left_lens": {
+                "angle": 130.601,
+                "position": [-6.25, 2.6, 0]
+            },
+            "right_lens": {
+                "angle": 40.601,
+                "position": [6.25, 2.6, 0]
+            }
+        }
+    }
+}
