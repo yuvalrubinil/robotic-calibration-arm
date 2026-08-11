@@ -26,7 +26,7 @@ class IKCompiler:
         # camera lenses
         self.left_lens = Lens(lenses['left_lens'])
         self.right_lens = Lens(lenses['right_lens'])
-        self.lens = self.left_lens
+        self.lens = self.right_lens
 
         # positions
         self.base_position = np.array(servos["0"]["position"], dtype=float)
@@ -91,24 +91,13 @@ class IKCompiler:
             base_angle = math.atan2(q[1] - self.base_position[1], q[0] - self.base_position[0])
             solutions.append((math.degrees(beta), math.degrees(base_angle)))
 
-        # de-duplicate (both signs of delta can coincide at tangent configurations)
-        unique_solutions = []
-        for solution in solutions:
-            if not any(
-                abs(solution[0] - other[0]) < 1e-6 and abs(solution[1] - other[1]) < 1e-6
-                for other in unique_solutions
-            ):
-                unique_solutions.append(solution)
-
-        # both roots are genuine solutions (mirror configurations); the one
-        # closest to world heading 0 deg on the signed (-180, 180] representation
-        # is returned first, so plain solutions[0] picks the sane branch by default.
+        # sortig by closenes to world heading 0, on the signed (-180, 180] representation
         def signed(angle_deg):
             return ((angle_deg + 180.0) % 360.0) - 180.0
+        
+        solutions.sort(key=lambda solution: abs(signed(solution[0])) + abs(signed(solution[1])))
 
-        unique_solutions.sort(key=lambda solution: abs(signed(solution[0])) + abs(signed(solution[1])))
-
-        return unique_solutions[0], q
+        return solutions[0], q
 
     def calc_wrist_position(self, target_pos, wrist_x, wrist_y):
         # right now assuming no tilt
@@ -153,13 +142,14 @@ class IKCompiler:
     def to_servo_angels(self, angle_config):
         base_angle, shoulder_angle, elbow_angle, _, yaw_angle, roll_angle = angle_config
         
-        base_angle = round(base_angle + (self.base_logical_zero - 90))
-        shoulder_angle = round(shoulder_angle + self.shoulder_logical_zero)
-        elbow_angle = round(self.elbow_logical_zero + elbow_angle)
-        wrist_angle = round(self.wrist_logical_zero - (elbow_angle - self.elbow_logical_zero))
-        yaw_angle = round(yaw_angle + self.yaw_logical_zero)
-        roll_angle = round(roll_angle)
-        return [base_angle, shoulder_angle, elbow_angle, wrist_angle, yaw_angle, roll_angle]
+        servo_base_angle = round(base_angle + (self.base_logical_zero - 90))
+        servo_shoulder_angle = round(shoulder_angle + self.shoulder_logical_zero)
+        servo_elbow_angle = round(self.elbow_logical_zero + elbow_angle)
+        servo_wrist_angle = round(self.wrist_logical_zero - elbow_angle)
+        servo_yaw_angle = round(yaw_angle + self.yaw_logical_zero)
+        servo_roll_angle = round(roll_angle)
+
+        return [servo_base_angle, servo_shoulder_angle, servo_elbow_angle, servo_wrist_angle, servo_yaw_angle, servo_roll_angle]
 
 
     
