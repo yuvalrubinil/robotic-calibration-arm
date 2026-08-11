@@ -136,7 +136,9 @@ class IKCompiler:
         wrist_pos = self.calc_wrist_position(target_pos, wrist_x, wrist_y)
         shoulder_angle, elbow_angle = self.calc_shoulder_and_elbow_angles(wrist_pos)
 
-        return [base_angle, shoulder_angle, elbow_angle, wrist_angle, yaw_angle, roll_angle]
+        angle_config = [base_angle, shoulder_angle, elbow_angle, wrist_angle, yaw_angle, roll_angle]
+        servo_angle_config = self.to_servo_angels(angle_config)
+        return servo_angle_config
 
 
     def to_servo_angels(self, angle_config):
