@@ -2,6 +2,7 @@ LAN:
 username: jetson-nano-ra
 host: 192.168.1.240
 
+ssh jetson-nano-ra@192.168.1.240
 cd RoboticArm
-source .venv/bin/activate
+source ~/arm-env/bin/activate
 python cli.py
