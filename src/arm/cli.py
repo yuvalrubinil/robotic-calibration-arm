@@ -33,10 +33,19 @@ def release_all(kit):
 def print_help():
     print("\nCommands:")
     print("  <channel> <angle>   Move servo")
-    print("  release             Disable all servos")
+    print("  reset             Move arm to resting position")
     print("  exit                Quit")
     print()
 
+
+def reset(kit):
+    kit.servo[0].angle = 140
+    kit.servo[1].angle = 270
+    kit.servo[2].angle = 200
+    kit.servo[3].angle = 100
+    kit.servo[4].angle = 90
+    kit.servo[5].angle = 90
+    release_all(kit)
 
 def main():
     try:
@@ -60,8 +69,8 @@ def main():
             if cmd in ("exit", "quit"):
                 break
 
-            if cmd == "release":
-                release_all(kit)
+            if cmd == "reset":
+                reset(kit)
                 continue
 
             parts = line.split()

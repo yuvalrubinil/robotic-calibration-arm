@@ -3,6 +3,30 @@ import numpy as np
 import json
 from lens import Lens
 
+def rotate_vector(vector, angle_deg, axis):
+    angle_rad = math.radians(angle_deg)
+
+    if axis == "x": # tilt rotation
+        R = np.array([
+            [1, 0, 0],
+            [0, np.cos(angle_rad), -np.sin(angle_rad)],
+            [0, np.sin(angle_rad), np.cos(angle_rad)],
+        ])
+    elif axis == "y": # roll rotation
+        R = np.array([
+            [np.cos(angle_rad), 0, np.sin(angle_rad)],
+            [0, 1, 0],
+            [-np.sin(angle_rad), 0, np.cos(angle_rad)],
+        ])
+    else:  # yaw rotation
+        R = np.array([
+            [np.cos(angle_rad), -np.sin(angle_rad), 0],
+            [np.sin(angle_rad), np.cos(angle_rad), 0],
+            [0, 0, 1],
+        ])
+
+    return R @ vector
+
 
 class IKCompiler:
     def __init__(self, arm_config):
@@ -23,16 +47,22 @@ class IKCompiler:
         self.elbow_arm_length = lengths["elbow_arm"]
         self.wrist_arm_length = lengths["wrist_arm"]
 
+        # translation_vectors
+        self.l1_translation_vec = np.array([0, 0, self.L1])
+        self.l2_translation_vec = np.array([self.L2, 0, 0])
+        self.l3_translation_vec = np.array([0, 0, self.L3])
+        self.tilt_translation_vec = np.array([0, 0, self.wrist_arm_length])
+
         # camera lenses
         self.left_lens = Lens(lenses['left_lens'])
         self.right_lens = Lens(lenses['right_lens'])
-        self.lens = self.left_lens
+        self.lens = self.right_lens
 
         # positions
         self.base_position = np.array(servos["0"]["position"], dtype=float)
         self.shoulder_servo_position = np.array(servos["1"]["position"], dtype=float)
 
-        # lofical zeros
+        # logical zeros
         self.base_logical_zero = servos["0"]["logical_zero"]
         self.shoulder_logical_zero = servos["1"]["logical_zero"]
         self.elbow_logical_zero = servos["2"]["logical_zero"]
@@ -40,6 +70,10 @@ class IKCompiler:
         self.yaw_logical_zero = servos["4"]["logical_zero"]
         self.roll_logical_zero = servos["5"]["logical_zero"]
 
+    def calc_tilt_angle(self, r, h, perpendicular=True):
+        lens_2_target_z_angle = math.degrees(math.atan(h / r))
+        tilt_angle = 90 - (lens_2_target_z_angle if not perpendicular else 0) 
+        return tilt_angle
 
     def calc_target_position(self, r, theta, h):
         target_angle = self.lens.angle + theta  # angle with respect to the camera center-line
@@ -50,16 +84,6 @@ class IKCompiler:
 
         return target_position
 
-    def calc_wrist_angle(self, r, h, elbow_angle, perpendicular=True):
-        if perpendicular:
-            wrist_angle = 90 - elbow_angle
-            return wrist_angle
-        else:
-            lens_2_target_z_angle = math.degrees(math.atan(h / r))
-            angle_complete = 90 - (lens_2_target_z_angle)
-            wrist_angle = angle_complete - elbow_angle
-            return wrist_angle
-
     def calc_yaw_and_base_angles(self, target_pos):
         # calc all vectors and positions
         lens_2_target_vec = (target_pos - self.lens.position)[:-1]
@@ -68,13 +92,14 @@ class IKCompiler:
         if lens_2_target_norm < 1:
             raise ValueError("Target is to close to the lens.")
 
-        lens_2_target_perpenducular_vec = np.array([-lens_2_target_vec[1], lens_2_target_vec[0]]) / lens_2_target_norm
-        l2_translation_vec = self.L2 * lens_2_target_perpenducular_vec
+        lens_2_target_perpenducular_dir_vec = np.array([-lens_2_target_vec[1], lens_2_target_vec[0]]) / lens_2_target_norm
+        yaw_axis_2_arget_dist = np.linalg.norm(self.l1_translation_vec[:-1] + self.l2_translation_vec[:-1]) # circle radius is l1 and l2 projections to xy (after they have been tilted and l1 also been rolled)
+        yaw_axis_2_target_vec = yaw_axis_2_arget_dist * lens_2_target_perpenducular_dir_vec
 
-        yaw_axis_position = target_pos[:-1] - l2_translation_vec
+        yaw_axis_position = target_pos[:-1] - yaw_axis_2_target_vec
 
         # calc A, B, C constants from the vectors and positions
-        v_x, v_y = l2_translation_vec
+        v_x, v_y = yaw_axis_2_target_vec
         w_x, w_y = yaw_axis_position - self.base_position[:-1]
         A = v_x * w_x + v_y * w_y
         B = -v_y * w_x + v_x * w_y
@@ -103,15 +128,19 @@ class IKCompiler:
 
         return solutions[0], q
 
-    def calc_wrist_position(self, target_pos, wrist_x, wrist_y):
-        # right now assuming no tilt
-        wrist_z = target_pos[2] + self.L1 + self.L3
-        wrist_pos = np.array([wrist_x, wrist_y, wrist_z])
-        return wrist_pos
+    def calc_wrist_position(self, target_position, yaw_position_xy):
+        yaw_position_z = (target_position + self.l1_translation_vec + self.l2_translation_vec + self.l3_translation_vec)[-1]
+        yaw_position = np.array([yaw_position_xy[0], yaw_position_xy[1], yaw_position_z])
+
+        wrist_position = yaw_position + self.tilt_translation_vec
+        return wrist_position
+
 
     def calc_shoulder_and_elbow_angles(self, wrist_position):
-        shoulder_2_wrist = wrist_position - self.shoulder_servo_position
-        shoulder_2_wrist_length = np.linalg.norm(shoulder_2_wrist)
+        shoulder_2_wrist_vec = wrist_position - self.shoulder_servo_position
+        xy_projection_dist = math.sqrt(shoulder_2_wrist_vec[0]**2 + shoulder_2_wrist_vec[1]**2)
+        shoulder_2_wrist_vec_angle = math.degrees(math.atan(shoulder_2_wrist_vec[-1] / xy_projection_dist))
+        shoulder_2_wrist_length = np.linalg.norm(shoulder_2_wrist_vec)
 
         # cosine rule
         a = self.shoulder_arm_length
@@ -124,32 +153,43 @@ class IKCompiler:
         elbow_angle = math.degrees(
             math.acos(max(-1.0, min(1.0, (a**2 + b**2 - c**2) / (2 * a * b))))
         )
-        elbow_angle -= (90 - shoulder_angle) # removing the shoulder share of the angle
+
+        shoulder_angle += shoulder_2_wrist_vec_angle  # adding the vector angle to make the shoulder_angle is with respect to the zero angle
 
         return shoulder_angle, elbow_angle
         
+    def calc_angle_config(self, r, theta, h, roll_angle=0, wrist_perpendicular_2_ground=True):
+        self.l1_translation_vec = rotate_vector(self.l1_translation_vec, roll_angle, 'y')
 
-    def calc_angle_config(self, r, theta, h, roll_angle=0.0, wrist_perpendicular_2_ground=True):
         target_pos = self.calc_target_position(r, theta, h)
+        tilt_angle = self.calc_tilt_angle(r, h, wrist_perpendicular_2_ground)
 
+        self.l1_translation_vec = rotate_vector(self.l1_translation_vec, 90-tilt_angle, 'x')
+        self.l2_translation_vec = rotate_vector(self.l2_translation_vec, 90-tilt_angle, 'x')
+        self.l3_translation_vec = rotate_vector(self.l3_translation_vec, 90-tilt_angle, 'x')
+        self.tilt_translation_vec = rotate_vector(self.tilt_translation_vec, 90-tilt_angle, 'x')
 
-        angles, wrist_pos = self.calc_yaw_and_base_angles(target_pos)
+        angles, yaw_pos_xy = self.calc_yaw_and_base_angles(target_pos)
         yaw_angle, base_angle = angles
-        wrist_x, wrist_y = wrist_pos
-        wrist_pos = self.calc_wrist_position(target_pos, wrist_x, wrist_y)
+
+        self.l1_translation_vec = rotate_vector(self.l1_translation_vec, yaw_angle, 'z')
+        self.l2_translation_vec = rotate_vector(self.l2_translation_vec, yaw_angle, 'z')
+        self.tilt_translation_vec = rotate_vector(self.tilt_translation_vec, -base_angle, 'z') # -base_angle cause we want to rotate the vector opposite to the base angle
+
+        wrist_pos = self.calc_wrist_position(target_pos, yaw_pos_xy)
         shoulder_angle, elbow_angle = self.calc_shoulder_and_elbow_angles(wrist_pos)
-        wrist_angle = self.calc_wrist_angle(r, h, elbow_angle, wrist_perpendicular_2_ground)
+        wrist_angle = 90 - (180 - shoulder_angle - elbow_angle)
+
         angle_config = [base_angle, shoulder_angle, elbow_angle, wrist_angle, yaw_angle, roll_angle]
         servo_angle_config = self.to_servo_angels(angle_config)
         return servo_angle_config
-
 
     def to_servo_angels(self, angle_config):
         base_angle, shoulder_angle, elbow_angle, wrist_angle, yaw_angle, roll_angle = angle_config
         
         servo_base_angle = round(base_angle + (self.base_logical_zero - 90))
         servo_shoulder_angle = round(shoulder_angle + self.shoulder_logical_zero)
-        servo_elbow_angle = round(self.elbow_logical_zero + elbow_angle)
+        servo_elbow_angle = round(self.elbow_logical_zero + (180 - elbow_angle))
         servo_wrist_angle = round(self.wrist_logical_zero - wrist_angle)
         servo_yaw_angle = round(yaw_angle + self.yaw_logical_zero)
         servo_roll_angle = round(roll_angle)
@@ -158,6 +198,4 @@ class IKCompiler:
 
 
     
-
-
     
