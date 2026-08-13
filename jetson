@@ -6,4 +6,7 @@ ssh jetson-nano-ra@192.168.1.240
 cd RoboticArm
 source ~/arm-env/bin/activate
 cd arm
+# optional, downlaod latest commited code:
+ curl -sL https://github.com/yuvalrubinil/robotic-calibration-arm/archive/refs/heads/main.tar.gz | tar -xz --strip-components=3 "robotic-calibration-arm-main/src/arm"
 python cli.py
+
