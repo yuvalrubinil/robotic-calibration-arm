@@ -5,4 +5,5 @@ host: 192.168.1.240
 ssh jetson-nano-ra@192.168.1.240
 cd RoboticArm
 source ~/arm-env/bin/activate
+cd arm
 python cli.py
