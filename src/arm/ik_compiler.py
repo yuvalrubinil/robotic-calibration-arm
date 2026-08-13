@@ -29,10 +29,7 @@ def rotate_vector(vector, angle_deg, axis):
 
 
 class IKCompiler:
-    def __init__(self, arm_config):
-        with open(arm_config, "r") as f:
-            config = json.load(f)
-
+    def __init__(self, config):
         lengths = config["arm"]["lengths"]
         servos = config["arm"]["servos"]
         lenses = config["camera"]["lenses"]
@@ -48,10 +45,7 @@ class IKCompiler:
         self.wrist_arm_length = lengths["wrist_arm"]
 
         # translation_vectors
-        self.l1_translation_vec = np.array([0, 0, self.L1])
-        self.l2_translation_vec = np.array([self.L2, 0, 0])
-        self.l3_translation_vec = np.array([0, 0, self.L3])
-        self.tilt_translation_vec = np.array([0, 0, self.wrist_arm_length])
+        self.reset_translation_vectors()
 
         # camera lenses
         self.left_lens = Lens(lenses['left_lens'])
@@ -69,6 +63,12 @@ class IKCompiler:
         self.wrist_logical_zero = servos["3"]["logical_zero"]
         self.yaw_logical_zero = servos["4"]["logical_zero"]
         self.roll_logical_zero = servos["5"]["logical_zero"]
+
+    def reset_translation_vectors(self):
+        self.l1_translation_vec = np.array([0, 0, self.L1], dtype=float)
+        self.l2_translation_vec = np.array([self.L2, 0, 0], dtype=float)
+        self.l3_translation_vec = np.array([0, 0, self.L3], dtype=float)
+        self.tilt_translation_vec = np.array([0, 0, self.wrist_arm_length], dtype=float)
 
     def calc_tilt_angle(self, r, h, perpendicular=True):
         lens_2_target_z_angle = math.degrees(math.atan(h / r))
@@ -135,7 +135,6 @@ class IKCompiler:
         wrist_position = yaw_position + self.tilt_translation_vec
         return wrist_position
 
-
     def calc_shoulder_and_elbow_angles(self, wrist_position):
         shoulder_2_wrist_vec = wrist_position - self.shoulder_servo_position
         xy_projection_dist = math.sqrt(shoulder_2_wrist_vec[0]**2 + shoulder_2_wrist_vec[1]**2)
@@ -159,15 +158,17 @@ class IKCompiler:
         return shoulder_angle, elbow_angle
         
     def calc_angle_config(self, r, theta, h, roll_angle=0, wrist_perpendicular_2_ground=True):
+        self.reset_translation_vectors()  # each call starts from a clean, unrotated baseline
         self.l1_translation_vec = rotate_vector(self.l1_translation_vec, roll_angle, 'y')
 
         target_pos = self.calc_target_position(r, theta, h)
         tilt_angle = self.calc_tilt_angle(r, h, wrist_perpendicular_2_ground)
 
-        self.l1_translation_vec = rotate_vector(self.l1_translation_vec, 90-tilt_angle, 'x')
-        self.l2_translation_vec = rotate_vector(self.l2_translation_vec, 90-tilt_angle, 'x')
-        self.l3_translation_vec = rotate_vector(self.l3_translation_vec, 90-tilt_angle, 'x')
-        self.tilt_translation_vec = rotate_vector(self.tilt_translation_vec, 90-tilt_angle, 'x')
+        delta_2_tilt = 90 - tilt_angle
+        self.l1_translation_vec = rotate_vector(self.l1_translation_vec, delta_2_tilt, 'x')
+        self.l2_translation_vec = rotate_vector(self.l2_translation_vec, delta_2_tilt, 'x')
+        self.l3_translation_vec = rotate_vector(self.l3_translation_vec, delta_2_tilt, 'x')
+        self.tilt_translation_vec = rotate_vector(self.tilt_translation_vec, delta_2_tilt, 'x')
 
         angles, yaw_pos_xy = self.calc_yaw_and_base_angles(target_pos)
         yaw_angle, base_angle = angles
@@ -181,14 +182,13 @@ class IKCompiler:
         wrist_angle = 90 - (180 - shoulder_angle - elbow_angle)
 
         angle_config = [base_angle, shoulder_angle, elbow_angle, wrist_angle, yaw_angle, roll_angle]
-        servo_angle_config = self.to_servo_angels(angle_config)
-        return servo_angle_config
+        return angle_config
 
     def to_servo_angels(self, angle_config):
         base_angle, shoulder_angle, elbow_angle, wrist_angle, yaw_angle, roll_angle = angle_config
         
-        servo_base_angle = round(base_angle + (self.base_logical_zero - 90))
-        servo_shoulder_angle = round(shoulder_angle + self.shoulder_logical_zero)
+        servo_base_angle = round((self.base_logical_zero - 90) + base_angle)
+        servo_shoulder_angle = round(self.shoulder_logical_zero + shoulder_angle)
         servo_elbow_angle = round(self.elbow_logical_zero + (180 - elbow_angle))
         servo_wrist_angle = round(self.wrist_logical_zero - wrist_angle)
         servo_yaw_angle = round(yaw_angle + self.yaw_logical_zero)
@@ -196,6 +196,37 @@ class IKCompiler:
 
         return [servo_base_angle, servo_shoulder_angle, servo_elbow_angle, servo_wrist_angle, servo_yaw_angle, servo_roll_angle]
 
+    def compile(self, program_path):
+        lens_headers = {
+            "LEFT_LENS:": self.left_lens,
+            "RIGHT_LENS:": self.right_lens,
+        }
 
-    
-    
+        with open(program_path, "r") as f:
+            lines = f.readlines()
+
+        angle_configs = []
+        for line_num, raw_line in enumerate(lines, start=1):
+            line = raw_line.strip()
+            if not line:
+                continue
+
+            if line in lens_headers:
+                self.lens = lens_headers[line]
+                continue
+
+            tokens = line.split()
+            if len(tokens) % 2 != 0:
+                raise ValueError(f"Malformed calibration program line {line_num}: {raw_line!r}")
+
+            point = dict(zip(tokens[0::2], tokens[1::2]))
+            missing_keys = {"r", "a", "h"} - point.keys()
+            if missing_keys:
+                raise ValueError(f"Calibration program line {line_num} missing {sorted(missing_keys)}: {raw_line!r}")
+
+            r, theta, h = float(point["r"]), float(point["a"]), float(point["h"])
+
+            angle_config = self.calc_angle_config(r, theta, h)
+            angle_configs.append(self.to_servo_angels(angle_config))
+
+        return angle_configs

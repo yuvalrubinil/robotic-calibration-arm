@@ -1,0 +1,149 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, angles, quotes, calc}
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{1.4ex plus .2ex minus .2ex}{0.8ex plus .1ex}
+\setlength{\abovedisplayskip}{7pt}
+\setlength{\belowdisplayskip}{7pt}
+
+\title{\texttt{IKCompiler.calc\_shoulder\_and\_elbow\_angles()}}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+\vspace{-5.5em}
+\small
+
+\begin{center}
+\resizebox{0.56\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=Stealth,
+    pt/.style={circle, fill, inner sep=1.3pt},
+    lbl/.style={font=\small},
+    ra/.style={gray!20!black}
+]
+    \draw[gray!35, thin] (-0.8,-0.6) -- (7.0,-0.6);
+    \draw[gray!35, thin] (-0.8,-0.6) -- (-0.8,4.2);
+
+    \coordinate (S) at (0, 0);
+    \coordinate (W) at (4.14, 1.51);
+    \coordinate (E) at (0.81, 2.89);
+    \coordinate (Ref) at (5.6, 0);
+
+    % horizontal reference (world zero angle) and auxiliary chord
+    \draw[dashed, gray!55] (S) -- (Ref);
+    \draw[dashed, gray!70] (S) -- (W) node[midway, below right=-2pt, lbl, gray!50!black] {$c$};
+
+    % physical links
+    \draw[thick, blue!60!black] (S) -- (E) node[midway, left=3pt, lbl, blue!60!black] {$a$};
+    \draw[thick, red!70!black] (E) -- (W) node[midway, above right=-2pt, lbl, red!70!black] {$b$};
+
+    \node[pt, violet!70!black] at (S) {};
+    \node[lbl, below=2pt] at (S) {$\mathbf s$};
+    \node[pt, teal!70!black] at (E) {};
+    \node[lbl, above left=1pt] at (E) {$E$};
+    \node[pt, red!70!black] at (W) {};
+    \node[lbl, right=2pt] at (W) {$\mathbf w$};
+
+    % elevation angle epsilon: horizontal ref to chord c
+    \pic[draw, violet!60!black, angle radius=7mm, angle eccentricity=1.5, "$\varepsilon$"] {angle = Ref--S--W};
+
+    % gamma: chord c to link a, at S
+    \pic[draw, orange!80!black, angle radius=11mm, angle eccentricity=1.4, "$\gamma$"] {angle = W--S--E};
+
+    % delta: elbow bend angle at E
+    \pic[draw, teal!70!black, angle radius=8mm, angle eccentricity=1.5, "$\delta$"] {angle = S--E--W};
+
+\end{tikzpicture}}
+\end{center}
+
+\noindent
+Physical links $\mathbf s E$ (length $a$) and $E\mathbf w$ (length $b$), solid. Auxiliary
+straight-line chord $\mathbf s \mathbf w$ (length $c$) and world-horizontal reference, dashed.
+$\gamma,\delta$ solved by the law of cosines on triangle $\mathbf s E\mathbf w$;
+$\varepsilon$ is the chord's own elevation, so $\gamma+\varepsilon$ is link $a$'s elevation
+in the world frame.
+
+\section{Setup}
+
+\begin{align*}
+\mathbf s &= \texttt{shoulder\_servo\_position}, \quad
+\mathbf w = \texttt{wrist\_position} &&\in \mathbb R^3\\
+a &= \texttt{shoulder\_arm\_length}, \quad
+b = \texttt{elbow\_arm\_length}
+\end{align*}
+
+$E$ is the (unknown, never explicitly computed) elbow position. It is fixed only implicitly,
+as the point at distance $a$ from $\mathbf s$ and distance $b$ from $\mathbf w$, in the vertical
+plane containing $\mathbf s$, $\mathbf w$, and the $z$-axis.
+
+\section{Elevation Angle}
+
+\begin{align}
+\mathbf d &= \mathbf w - \mathbf s, \qquad
+r = \sqrt{d_x^2 + d_y^2} \\
+\varepsilon &= \operatorname{atan}\!\left(\frac{d_z}{r}\right)
+\end{align}
+the angle the chord $\mathbf s\mathbf w$ makes above the world-horizontal plane (\texttt{atan}
+suffices in place of \texttt{atan2} since $r \ge 0$ always).
+
+\begin{equation}
+c = \lVert \mathbf d \rVert = \sqrt{r^2 + d_z^2}
+\end{equation}
+
+\section{Law of Cosines}
+
+Triangle $\mathbf s E \mathbf w$ has sides $a = \mathbf s E$, $b = E\mathbf w$,
+$c = \mathbf s \mathbf w$. The law of cosines gives its interior angles at $\mathbf s$ and $E$:
+\begin{align}
+\gamma &= \angle(\mathbf s) = \arccos\!\left(\frac{a^2 + c^2 - b^2}{2ac}\right)
+&&\text{angle between } \mathbf s\mathbf w \text{ and } \mathbf s E \\
+\delta &= \angle(E) = \arccos\!\left(\frac{a^2 + b^2 - c^2}{2ab}\right)
+&&\text{angle between } E\mathbf s \text{ and } E\mathbf w
+\end{align}
+$\delta = 180^\circ$ is the fully-extended (straight) configuration $\mathbf s, E, \mathbf w$
+collinear -- the reference the servo-space elbow command is built against
+(\texttt{elbow\_logical\_zero + (180 - elbow\_angle)}).
+
+\section{World-Frame Shoulder Angle}
+
+$\gamma$ is measured from the chord $\mathbf s\mathbf w$, not from horizontal. Since
+$\varepsilon$ is exactly the chord's own elevation, adding it rotates $\gamma$ into the world
+frame -- the elevation of link $a$ itself:
+
+\begin{equation}
+\raisebox{-0.5\height}{\tikz \node[draw=gray!45!black, line width=1.4pt, rounded corners=3pt,
+fill=gray!8, inner sep=14pt]
+{\Large $\displaystyle \texttt{shoulder\_angle} = \gamma + \varepsilon$};}
+\qquad
+\texttt{elbow\_angle} = \delta
+\end{equation}
+
+\section{Notation $\leftrightarrow$ Code}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Symbol & Variable \\
+\midrule
+$\mathbf s$ & \texttt{shoulder\_servo\_position} \\
+$\mathbf w$ & \texttt{wrist\_position} \\
+$a,\,b$ & \texttt{shoulder\_arm\_length}, \texttt{elbow\_arm\_length} \\
+$\mathbf d$ & \texttt{shoulder\_2\_wrist\_vec} \\
+$r$ & \texttt{xy\_projection\_dist} \\
+$\varepsilon$ & \texttt{shoulder\_2\_wrist\_vec\_angle} \\
+$c$ & \texttt{shoulder\_2\_wrist\_length} \\
+$\gamma$ & (\texttt{shoulder\_angle}, before the \texttt{+=} correction) \\
+$\delta$ & \texttt{elbow\_angle} \\
+$\gamma+\varepsilon$ & \texttt{shoulder\_angle} (returned) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

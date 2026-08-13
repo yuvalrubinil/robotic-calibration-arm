@@ -1,4 +1,5 @@
 import sys
+import time
 from adafruit_servokit import ServoKit
 
 DS3218_CHANNELS = {0, 1, 2, 3}
@@ -45,6 +46,7 @@ def reset(kit):
     kit.servo[3].angle = 100
     kit.servo[4].angle = 90
     kit.servo[5].angle = 90
+    time.sleep(1)
     release_all(kit)
 
 def main():
