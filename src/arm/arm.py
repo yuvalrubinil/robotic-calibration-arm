@@ -24,6 +24,7 @@ class Arm:
 
         # init servos
         servo_config = config["arm"]["servos"]
+        servo_types = servo_config["types"]
         self.servos = []
         for channel_str, _ in servo_config.items():
             if channel_str == "types":
@@ -33,7 +34,7 @@ class Arm:
             servo = Servo(
                 kit=self.kit,
                 channel=channel,
-                servo_config=servo_config[channel_str]
+                servo_config={**servo_config[channel_str], "type_config": servo_types[servo_config[channel_str]["type"]]}
             )
             self.servos.append(servo)
 
