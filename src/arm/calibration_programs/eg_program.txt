@@ -1,0 +1,17 @@
+LEFT_LENS:
+r 10 a -20 h 0
+r 10 a -10 h 0
+r 10 a 0 h 0
+r 10 a 0 h 0 ro 20
+r 10 a 0 h 0 ro -20
+r 10 a 10 h 0
+r 10 a 20 h 0
+
+RIGHT_LENS:
+r 10 a -20 h 0
+r 10 a -10 h 0
+r 10 a 0 h 0
+r 10 a 0 h 0 ro 20
+r 10 a 0 h 0 ro -20
+r 10 a 10 h 0
+r 10 a 20 h 0

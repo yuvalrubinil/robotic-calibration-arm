@@ -225,8 +225,9 @@ class IKCompiler:
                 raise ValueError(f"Calibration program line {line_num} missing {sorted(missing_keys)}: {raw_line!r}")
 
             r, theta, h = float(point["r"]), float(point["a"]), float(point["h"])
+            roll_angle = float(point["ro"]) if "ro" in point else 0
 
-            angle_config = self.calc_angle_config(r, theta, h)
+            angle_config = self.calc_angle_config(r, theta, h, roll_angle=roll_angle)
             angle_configs.append(self.to_servo_angels(angle_config))
 
         return angle_configs
