@@ -33,7 +33,7 @@ class Arm:
             servo = Servo(
                 kit=self.kit,
                 channel=channel,
-                servo_config=servo_config[channel]
+                servo_config=servo_config[channel_str]
             )
             self.servos.append(servo)
 
