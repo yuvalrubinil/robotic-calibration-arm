@@ -2,7 +2,7 @@ import json
 import time
 from pathlib import Path
 from adafruit_servokit import ServoKit
-from arm.servo import Servo
+from servo import Servo
 from ik_compiler import IKCompiler
 
 CALIBRATION_PROGRAMS_DIR = Path(__file__).parent / "calibration_programs"

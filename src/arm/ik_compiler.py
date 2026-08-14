@@ -1,6 +1,5 @@
 import math
 import numpy as np
-import json
 from lens import Lens
 
 def rotate_vector(vector, angle_deg, axis):
