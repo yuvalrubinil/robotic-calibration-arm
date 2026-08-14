@@ -21,16 +21,7 @@ class Servo:
         self.angle = None
 
     def set_angle(self, angle):
-        min_angle, max_angle = self.operating_range
-
-        if not (min_angle <= angle <= max_angle):
-            raise ValueError(
-                f"{self.name}: angle {angle} outside operating range "
-                f"{self.operating_range}"
-            )
-        
-        physical_angle = self.logical_zero + angle
-        self.kit.servo[self.channel].angle = physical_angle
+        self.kit.servo[self.channel].angle = angle
         self.angle = angle
 
         

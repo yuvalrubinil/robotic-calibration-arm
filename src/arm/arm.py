@@ -22,6 +22,9 @@ class Arm:
 
         self.calibration_program = None
 
+        # resting position
+        self.zero_state = config["arm"]["zero_state"]
+
         # init servos
         servo_config = config["arm"]["servos"]
         servo_types = servo_config["types"]
@@ -43,6 +46,9 @@ class Arm:
             self.servos[idx].set_angle(angle)
         time.sleep(1)
 
+    def reset(self):
+        self.set_angle_config(self.zero_state)
+
     def compile_program(self, program_name):
         program_path = CALIBRATION_PROGRAMS_DIR / program_name
         self.calibration_program = self.ikc.compile(program_path)
@@ -52,6 +58,9 @@ class Arm:
         if not self.calibration_program:
             print("No calibration program provided.")
             return
+        # wraping each program in reset() to start and finish at the zero_state
+        self.reset()
         for angle_config in self.calibration_program:
             self.set_angle_config(angle_config)
+        self.reset()
             

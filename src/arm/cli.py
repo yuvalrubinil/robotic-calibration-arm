@@ -1,10 +1,20 @@
+import json
 import sys
 import time
+from pathlib import Path
 from adafruit_servokit import ServoKit
+
+CONFIG_PATH = Path(__file__).parent / "config.json"
 
 DS3218_CHANNELS = {0, 1, 2, 3}
 MG996R_CHANNELS = {4, 5}
 ALL_CHANNELS = DS3218_CHANNELS | MG996R_CHANNELS
+
+
+def load_zero_state():
+    with open(CONFIG_PATH, "r") as f:
+        config = json.load(f)
+    return config["arm"]["zero_state"]
 
 
 def configure_servos(kit):
@@ -40,12 +50,8 @@ def print_help():
 
 
 def reset(kit):
-    kit.servo[0].angle = 140
-    kit.servo[1].angle = 270
-    kit.servo[2].angle = 200
-    kit.servo[3].angle = 100
-    kit.servo[4].angle = 90
-    kit.servo[5].angle = 90
+    for channel, angle in enumerate(load_zero_state()):
+        kit.servo[channel].angle = angle
     time.sleep(1)
     release_all(kit)
 

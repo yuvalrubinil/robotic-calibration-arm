@@ -63,6 +63,9 @@ class IKCompiler:
         self.yaw_logical_zero = servos["4"]["logical_zero"]
         self.roll_logical_zero = servos["5"]["logical_zero"]
 
+        # operating ranges
+        self.servo_operating_ranges = [(servos[str(i)]["name"], tuple(servos[str(i)]["operating_range"])) for i in range(6)]
+
     def reset_translation_vectors(self):
         self.l1_translation_vec = np.array([0, 0, self.L1], dtype=float)
         self.l2_translation_vec = np.array([self.L2, 0, 0], dtype=float)
@@ -191,9 +194,15 @@ class IKCompiler:
         servo_elbow_angle = round(self.elbow_logical_zero + (180 - elbow_angle))
         servo_wrist_angle = round(self.wrist_logical_zero - wrist_angle)
         servo_yaw_angle = round(yaw_angle + self.yaw_logical_zero)
-        servo_roll_angle = round(roll_angle)
+        servo_roll_angle = round(self.roll_logical_zero + roll_angle)
 
-        return [servo_base_angle, servo_shoulder_angle, servo_elbow_angle, servo_wrist_angle, servo_yaw_angle, servo_roll_angle]
+        servo_angles = [servo_base_angle, servo_shoulder_angle, servo_elbow_angle, servo_wrist_angle, servo_yaw_angle, servo_roll_angle]
+
+        for (name, (min_angle, max_angle)), angle in zip(self.servo_operating_ranges, servo_angles):
+            if not (min_angle <= angle <= max_angle):
+                raise ValueError(f"{name}: angle {angle} outside operating range {(min_angle, max_angle)}")
+
+        return servo_angles
 
     def compile(self, program_path):
         lens_headers = {
@@ -227,6 +236,9 @@ class IKCompiler:
             roll_angle = float(point["ro"]) if "ro" in point else 0
 
             angle_config = self.calc_angle_config(r, theta, h, roll_angle=roll_angle)
-            angle_configs.append(self.to_servo_angels(angle_config))
+            try:
+                angle_configs.append(self.to_servo_angels(angle_config))
+            except ValueError as e:
+                raise ValueError(f"Calibration program line {line_num}: {e}") from e
 
         return angle_configs
