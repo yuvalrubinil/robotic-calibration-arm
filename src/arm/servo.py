@@ -18,17 +18,7 @@ class Servo:
         hw.set_pulse_width_range(self.min_pulse, self.max_pulse)
         hw.actuation_range = self.servo_range
 
-        # validate operating range
-        physical_min = self.logical_zero + self.operating_range[0]
-        physical_max = self.logical_zero + self.operating_range[1]
-        if physical_min < 0 or self.servo_range < physical_max:
-            raise ValueError(
-                f"{self.name}: operating range {self.operating_range} "
-                f"with logical_zero={self.logical_zero} exceeds "
-                f"physical range [0, {self.servo_range}]"
-            )
-
-        self.angle = 0
+        self.angle = None
 
     def set_angle(self, angle):
         min_angle, max_angle = self.operating_range
