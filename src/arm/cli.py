@@ -34,7 +34,7 @@ def release_all(kit):
 def print_help():
     print("\nCommands:")
     print("  <channel> <angle>   Move servo")
-    print("  reset             Move arm to resting position")
+    print("  reset               Move arm to resting position")
     print("  exit                Quit")
     print()
 

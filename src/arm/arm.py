@@ -20,6 +20,8 @@ class Arm:
         # init the inverse kinematics compiler
         self.ikc = IKCompiler(config)
 
+        self.calibration_program = None
+
         # init servos
         servo_config = config["arm"]["servos"]
         self.servos = []
@@ -42,9 +44,13 @@ class Arm:
 
     def compile_program(self, program_name):
         program_path = CALIBRATION_PROGRAMS_DIR / program_name
-        return self.ikc.compile(program_path)
+        self.calibration_program = self.ikc.compile(program_path)
+        print("Calibration program compiled.")
 
-    def execute(self, calibration_program):
-        for angle_config in calibration_program:
+    def execute(self, ):
+        if not self.calibration_program:
+            print("No calibration program provided.")
+            return
+        for angle_config in self.calibration_program:
             self.set_angle_config(angle_config)
             
