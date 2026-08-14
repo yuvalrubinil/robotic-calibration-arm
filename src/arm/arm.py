@@ -48,7 +48,7 @@ class Arm:
         self.calibration_program = self.ikc.compile(program_path)
         print("Calibration program compiled.")
 
-    def execute(self, ):
+    def execute(self):
         if not self.calibration_program:
             print("No calibration program provided.")
             return
