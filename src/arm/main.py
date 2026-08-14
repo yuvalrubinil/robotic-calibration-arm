@@ -1,5 +1,5 @@
 import argparse
-from arm.arm import Arm
+from arm import Arm
 from pathlib import Path
 
 ARM_CONFIG = Path(__file__).parent / "config.json"
