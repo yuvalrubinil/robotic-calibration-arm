@@ -10,3 +10,4 @@ args = parser.parse_args()
 
 arm = Arm(ARM_CONFIG)
 arm.compile_program(args.program)
+arm.execude()
