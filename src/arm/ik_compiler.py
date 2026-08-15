@@ -215,10 +215,6 @@ class IKCompiler:
         return servo_angles
 
     def compile(self, program_path):
-        lens_headers = {
-            "LEFT_LENS:": self.left_lens,
-            "RIGHT_LENS:": self.right_lens,
-        }
 
         with open(program_path, "r") as f:
             lines = f.readlines()
@@ -227,10 +223,6 @@ class IKCompiler:
         for line_num, raw_line in enumerate(lines, start=1):
             line = raw_line.strip()
             if not line:
-                continue
-
-            if line in lens_headers:
-                self.lens = lens_headers[line]
                 continue
 
             tokens = line.split()
