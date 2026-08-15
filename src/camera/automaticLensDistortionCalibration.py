@@ -307,7 +307,7 @@ if __name__ == "__main__":
     #test()
 
     # tell the arm Jetson to start running the calibration program
-    calibrartion_arm_client.send_start(args.program)
+    calibrartion_arm_client.send_start(args.program, args.side)
 
     app.run(host='0.0.0.0', port=5000, debug=True, threaded=True, use_reloader=False)
 

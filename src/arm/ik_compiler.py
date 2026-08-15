@@ -49,7 +49,7 @@ class IKCompiler:
         # camera lenses
         self.left_lens = Lens(lenses['left_lens'])
         self.right_lens = Lens(lenses['right_lens'])
-        self.lens = self.right_lens
+        self.select_lens("right")
 
         # positions
         self.base_position = np.array(servos["0"]["position"], dtype=float)
@@ -65,6 +65,14 @@ class IKCompiler:
 
         # operating ranges
         self.servo_operating_ranges = [(servos[str(i)]["name"], tuple(servos[str(i)]["operating_range"])) for i in range(6)]
+
+    def select_lens(self, side):
+        if side == "left":
+            self.lens = self.left_lens
+        elif side == "right":
+            self.lens = self.right_lens
+        else:
+            raise ValueError(f"Unknown lens side: {side!r}, expected 'left' or 'right'")
 
     def reset_translation_vectors(self):
         self.l1_translation_vec = np.array([0, 0, self.L1], dtype=float)
