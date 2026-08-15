@@ -1,17 +1,61 @@
 LEFT_LENS:
-r 10 a -20 h 0
-r 10 a -10 h 0
-r 10 a 0 h 0
-r 10 a 0 h 0 ro 20
-r 10 a 0 h 0 ro -20
-r 10 a 10 h 0
-r 10 a 20 h 0
+r 15 a -30 h 5
+r 15 a -20 h 5
+r 15 a -10 h 5
+r 15 a 0 h 5
+r 15 a 10 h 5
+r 15 a 20 h 5
+r 15 a 30 h 5
+
+r 15 a 30 h 0
+r 15 a 20 h 0
+r 15 a 10 h 0
+r 15 a 0 h 0
+r 15 a -10 h 0
+r 15 a -20 h 0
+r 15 a -30 h 0
+
+r 15 a -30 h -5
+r 15 a -20 h -5
+r 15 a -10 h -5
+r 15 a 0 h -5
+r 15 a 10 h -5
+r 15 a 20 h -5
+r 15 a 30 h -5
+
+r 15 a 0 h 0
+r 15 a 0 h 0 ro 30
+r 15 a 0 h 0 ro -30
+r 15 a 0 h 0 ro 20
+r 15 a 0 h 0 ro -20
 
 RIGHT_LENS:
-r 10 a -20 h 0
-r 10 a -10 h 0
-r 10 a 0 h 0
-r 10 a 0 h 0 ro 20
-r 10 a 0 h 0 ro -20
-r 10 a 10 h 0
-r 10 a 20 h 0
+r 15 a -30 h 5
+r 15 a -20 h 5
+r 15 a -10 h 5
+r 15 a 0 h 5
+r 15 a 10 h 5
+r 15 a 20 h 5
+r 15 a 30 h 5
+
+r 15 a 30 h 0
+r 15 a 20 h 0
+r 15 a 10 h 0
+r 15 a 0 h 0
+r 15 a -10 h 0
+r 15 a -20 h 0
+r 15 a -30 h 0
+
+r 15 a -30 h -5
+r 15 a -20 h -5
+r 15 a -10 h -5
+r 15 a 0 h -5
+r 15 a 10 h -5
+r 15 a 20 h -5
+r 15 a 30 h -5
+
+r 15 a 0 h 0
+r 15 a 0 h 0 ro 30
+r 15 a 0 h 0 ro -30
+r 15 a 0 h 0 ro 20
+r 15 a 0 h 0 ro -20

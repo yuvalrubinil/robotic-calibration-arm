@@ -8,6 +8,7 @@ from typing import List
 import time
 from scipy.spatial import ConvexHull
 from flask import Flask, Response
+import calibrartion_arm_client
 #from numba import jit
 
 app = Flask(__name__)
@@ -195,8 +196,16 @@ def calibrate_camera(side):
                     print("Mean reprojection error: {}".format(calib_error))
                     donecalibration = True
 
-                    if calib_error < max_calibration_error:
-                        save_calibration(side, mtx, dist, w, h, calib_error)
+
+                    calibrartion_success = calib_error < max_calibration_error
+
+                    # send the arm final calibrartion status
+                    calibrartion_arm_client.send_calibration_done(calibrartion_success, calib_error)
+
+                    # !!! will uncomment before prod
+                    #if calibrartion_success:
+                        # save_calibration(side, mtx, dist, w, h, calib_error)
+                    
 
                 ret_val, frame = video_capture.read()
 
@@ -227,6 +236,9 @@ def calibrate_camera(side):
                         found = True
                     else:
                         found = False
+
+                    # send the arm frame status
+                    calibrartion_arm_client.send_frame_status(found, cover, cornersCount)
 
                 # Draw and display the corners
                 if corners2 is not None and not donecalibration and found:

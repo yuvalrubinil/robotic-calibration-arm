@@ -1,6 +1,14 @@
 import argparse
 from arm import Arm
 from pathlib import Path
+import threading
+from calibration_arm_server import app as status_app
+
+threading.Thread(
+    target=status_app.run,
+    kwargs={"host": "0.0.0.0", "port": 5001, "threaded": True, "use_reloader": False},
+    daemon=True,
+).start()
 
 ARM_CONFIG = Path(__file__).parent / "config.json"
 

@@ -148,6 +148,8 @@ class IKCompiler:
         b = self.elbow_arm_length
         c = shoulder_2_wrist_length
 
+        if a + b < c: raise ValueError(f"Target unreachable")
+
         shoulder_angle = math.degrees(
             math.acos(max(-1.0, min(1.0, (a**2 + c**2 - b**2) / (2 * a * c))))
         )
