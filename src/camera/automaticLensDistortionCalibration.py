@@ -301,10 +301,14 @@ if __name__ == "__main__":
     # read args
     parser = argparse.ArgumentParser(description='Calibrate camera')
     parser.add_argument('--side', type=str, default="left", help='Side of the camera')
+    parser.add_argument('--program', type=str, default="eg_program", help='Name of the calibration program to run on the arm')
     args = parser.parse_args()
-    
+
     #test()
-    
+
+    # tell the arm Jetson to start running the calibration program
+    calibrartion_arm_client.send_start(args.program)
+
     app.run(host='0.0.0.0', port=5000, debug=True, threaded=True, use_reloader=False)
 
     # sleep 1 second
