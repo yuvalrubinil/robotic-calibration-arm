@@ -5,6 +5,7 @@ host: 192.168.1.240
 ssh jetson-nano-ra@192.168.1.240
 cd RoboticArm
 source ~/arm-env/bin/activate
+python main.py eg_program
 # optional 1, downlaod latest commited code to the jetson:
  curl -sL https://github.com/yuvalrubinil/robotic-calibration-arm/archive/refs/heads/main.tar.gz | tar -xz --strip-components=3 "robotic-calibration-arm-main/src/arm"
 # optional 2, move the entire content of the local /arm to the jetson:
