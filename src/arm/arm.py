@@ -54,13 +54,17 @@ class Arm:
         self.calibration_program = self.ikc.compile(program_path)
         print("Calibration program compiled.")
 
-    def execute(self):
+    def execute(self, step=None):
         if not self.calibration_program:
             print("No calibration program provided.")
             return
         # wraping each program in reset() to start and finish at the zero_state
         self.reset()
-        for angle_config in self.calibration_program:
+
+        for step_num, angle_config in enumerate(self.calibration_program, start=1):
             self.set_angle_config(angle_config)
+            if step is not None: # moving to the next step when arm_server gets a: /status
+                step(step_num)
+
         self.reset()
             

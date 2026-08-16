@@ -1,5 +1,6 @@
 import argparse
 import multiprocessing
+import time
 from pathlib import Path
 
 from flask import Flask, jsonify, request
@@ -9,23 +10,48 @@ from arm import Arm
 ARM_CONFIG = Path(__file__).parent / "config.json"
 CALIBRATION_PROGRAMS_DIR = Path(__file__).parent / "calibration_programs"
 
+STATUS_TIMEOUT_SECONDS = 10
+STATUS_POLL_INTERVAL_SECONDS = 0.2
+
 app = Flask(__name__)
 
 arm = Arm(ARM_CONFIG)
-latest_status = None
 run_process = None
 
+status_manager = multiprocessing.Manager()
+shared_status = status_manager.dict(value=None)
 
-def _run_program(program_name, side):
-    arm.ikc.select_lens(side)
-    arm.compile_program(program_name)
-    arm.execute()
+
+def wait_board_found(shared_status, timeout=STATUS_TIMEOUT_SECONDS):
+    shared_status["value"] = None
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        status = shared_status["value"]
+        if status is not None:
+            if status.get("type") == "frame" and status.get("found"): # found the board
+                return
+            shared_status["value"] = None  
+        time.sleep(STATUS_POLL_INTERVAL_SECONDS)
+    raise TimeoutError(f"Status not received within {timeout}s")
+
+
+def run_program(program_name, side, shared_status):
+    arm.ikc.set_lens(side)
+
+    def step():
+        wait_board_found(shared_status)
+
+    try:
+        arm.compile_program(program_name)
+        arm.execute(step=step)
+    except TimeoutError as e:
+        print(f"Aborting program: {e}")
+        arm.reset()
 
 
 @app.route('/status', methods=['POST'])
 def receive_status():
-    global latest_status
-    latest_status = request.get_json(force=True)
+    shared_status["value"] = request.get_json(force=True)
     return jsonify({"ok": True})
 
 
@@ -61,7 +87,7 @@ def start():
     print(f"Starting program: {program_name} ({side} lens)")
     # Run in a separate process so the Flask server keeps responding to
     # other requests (e.g. /status) while the arm is moving.
-    run_process = multiprocessing.Process(target=_run_program, args=(program_name, side), daemon=True)
+    run_process = multiprocessing.Process(target=run_program, args=(program_name, side, shared_status), daemon=True)
     run_process.start()
     return jsonify({"ok": True, "message": f"Started {program_name}"})
 

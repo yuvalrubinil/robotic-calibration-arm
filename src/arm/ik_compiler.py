@@ -49,7 +49,7 @@ class IKCompiler:
         # camera lenses
         self.left_lens = Lens(lenses['left_lens'])
         self.right_lens = Lens(lenses['right_lens'])
-        self.select_lens("right")
+        self.set_lens("right")
 
         # positions
         self.base_position = np.array(servos["0"]["position"], dtype=float)
@@ -66,7 +66,7 @@ class IKCompiler:
         # operating ranges
         self.servo_operating_ranges = [(servos[str(i)]["name"], tuple(servos[str(i)]["operating_range"])) for i in range(6)]
 
-    def select_lens(self, side):
+    def set_lens(self, side):
         if side == "left":
             self.lens = self.left_lens
         elif side == "right":
@@ -118,8 +118,10 @@ class IKCompiler:
         # solvig for delta and phi, where:
         # delta = +-(beta - phi)
         R = math.hypot(A, B)
+        if abs(C) > R:
+            raise ValueError("Target unreachable: yaw axis too close to target")
         phi = math.atan2(B, A)
-        delta = math.acos(max(-1.0, min(1.0, C / R)))
+        delta = math.acos(C / R)
 
         # getting beta and thetha
         solutions = []
@@ -237,8 +239,8 @@ class IKCompiler:
             r, theta, h = float(point["r"]), float(point["a"]), float(point["h"])
             roll_angle = float(point["ro"]) if "ro" in point else 0
 
-            angle_config = self.calc_angle_config(r, theta, h, roll_angle=roll_angle)
             try:
+                angle_config = self.calc_angle_config(r, theta, h, roll_angle=roll_angle)
                 angle_configs.append(self.to_servo_angels(angle_config))
             except ValueError as e:
                 raise ValueError(f"Calibration program line {line_num}: {e}") from e
