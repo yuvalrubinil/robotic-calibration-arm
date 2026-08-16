@@ -61,10 +61,10 @@ class Arm:
         # wraping each program in reset() to start and finish at the zero_state
         self.reset()
 
-        for step_num, angle_config in enumerate(self.calibration_program, start=1):
+        for angle_config in self.calibration_program:
             self.set_angle_config(angle_config)
             if step is not None: # moving to the next step when arm_server gets a: /status
-                step(step_num)
+                step()
 
         self.reset()
             
