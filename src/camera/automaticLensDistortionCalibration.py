@@ -212,21 +212,23 @@ def calibrate_camera(side):
                 if count % 120 == 0 and not donecalibration:
                     gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
 
-                    # Find the chess board corners CALIB_CB_NORMALIZE_IMAGE | CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_FILTER_QUADS | CALIB_CB_FAST_CHECK
                     ret, corners = cv2.findChessboardCorners(gray, (chessBoard[0],chessBoard[1]),None)
 
-                    # If found, add object points, image points (after refining them)
+                    current_frame_corners = None
+                    frame_h, frame_w = frame.shape[:2]
                     if ret == True:
                         objpoints.append(objp)
 
                         corners2 = cv2.cornerSubPix(gray,corners,(11,11),(-1,-1),criteria)
                         imgpoints.append(corners2)
-                        
+
+                        current_frame_corners = corners2.reshape(-1, 2).tolist()
+
                         if lastCorners is not None:
                             corners2 = np.concatenate((corners2, lastCorners), axis=0)
 
                         hull = cv2.convexHull(corners2)
-                        # calculate area of hull 
+                        # calculate area of hull
                         area = cv2.contourArea(hull)
                         h,  w = frame.shape[:2]
                         cover = int((area / (w * h)) * 100)
@@ -238,7 +240,7 @@ def calibrate_camera(side):
                         found = False
 
                     # send the arm frame status
-                    calibrartion_arm_client.send_frame_status(found, cover, cornersCount)
+                    calibrartion_arm_client.send_frame_status(found, current_frame_corners, (frame_w, frame_h), cover, cornersCount)
 
                 # Draw and display the corners
                 if corners2 is not None and not donecalibration and found:
@@ -301,13 +303,12 @@ if __name__ == "__main__":
     # read args
     parser = argparse.ArgumentParser(description='Calibrate camera')
     parser.add_argument('--side', type=str, default="left", help='Side of the camera')
-    parser.add_argument('--program', type=str, default="eg_program", help='Name of the calibration program to run on the arm')
     args = parser.parse_args()
 
     #test()
 
-    # tell the arm Jetson to start running the calibration program
-    calibrartion_arm_client.send_start(args.program, args.side)
+    # tell the arm Jetson to start the smart calibration walk
+    calibrartion_arm_client.send_start(args.side)
 
     app.run(host='0.0.0.0', port=5000, debug=True, threaded=True, use_reloader=False)
 

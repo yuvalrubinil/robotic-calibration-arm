@@ -1,11 +1,8 @@
 import json
 import time
-from pathlib import Path
 from adafruit_servokit import ServoKit
 from servo import Servo
 from ik_compiler import IKCompiler
-
-CALIBRATION_PROGRAMS_DIR = Path(__file__).parent / "calibration_programs"
 
 
 class Arm:
@@ -19,8 +16,6 @@ class Arm:
 
         # init the inverse kinematics compiler
         self.ikc = IKCompiler(config)
-
-        self.calibration_program = None
 
         # resting position
         self.zero_state = config["arm"]["zero_state"]
@@ -49,22 +44,8 @@ class Arm:
     def reset(self):
         self.set_angle_config(self.zero_state)
 
-    def compile_program(self, program_name):
-        program_path = CALIBRATION_PROGRAMS_DIR / program_name
-        self.calibration_program = self.ikc.compile(program_path)
-        print("Calibration program compiled.")
+    def move_to(self, r, theta, h, roll_angle=0):
+        angle_config = self.ikc.calc_angle_config(r, theta, h, roll_angle=roll_angle)
+        servo_angles = self.ikc.to_servo_angels(angle_config)
+        self.set_angle_config(servo_angles)
 
-    def execute(self, step=None):
-        if not self.calibration_program:
-            print("No calibration program provided.")
-            return
-        # wraping each program in reset() to start and finish at the zero_state
-        self.reset()
-
-        for angle_config in self.calibration_program:
-            self.set_angle_config(angle_config)
-            if step is not None: # moving to the next step when arm_server gets a: /status
-                step()
-
-        self.reset()
-            

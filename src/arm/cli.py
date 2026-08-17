@@ -1,3 +1,4 @@
+import argparse
 import json
 import sys
 import time
@@ -47,6 +48,17 @@ def release_all(kit):
     print("All servos released.")
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Robotic arm CLI")
+    parser.add_argument(
+        "--side",
+        choices=("left", "right"),
+        default="right",
+        help="Camera lens side to calibrate against (default: right)",
+    )
+    return parser.parse_args()
+
+
 def print_help():
     print("\nCommands:")
     print("  <channel> <angle>          Move servo")
@@ -87,6 +99,8 @@ def run_ik_line(kit, ikc, line):
 
 
 def main():
+    args = parse_args()
+
     try:
         kit = ServoKit(channels=16)
         configure_servos(kit)
@@ -95,6 +109,7 @@ def main():
         sys.exit(1)
 
     ikc = IKCompiler(load_config())
+    ikc.set_lens(args.side)
 
     print_help()
 

@@ -215,34 +215,3 @@ class IKCompiler:
                 raise ValueError(f"{name}: angle {angle} outside operating range {(min_angle, max_angle)}")
 
         return servo_angles
-
-    def compile(self, program_path):
-
-        with open(program_path, "r") as f:
-            lines = f.readlines()
-
-        angle_configs = []
-        for line_num, raw_line in enumerate(lines, start=1):
-            line = raw_line.strip()
-            if not line:
-                continue
-
-            tokens = line.split()
-            if len(tokens) % 2 != 0:
-                raise ValueError(f"Malformed calibration program line {line_num}: {raw_line!r}")
-
-            point = dict(zip(tokens[0::2], tokens[1::2]))
-            missing_keys = {"r", "a", "h"} - point.keys()
-            if missing_keys:
-                raise ValueError(f"Calibration program line {line_num} missing {sorted(missing_keys)}: {raw_line!r}")
-
-            r, theta, h = float(point["r"]), float(point["a"]), float(point["h"])
-            roll_angle = float(point["ro"]) if "ro" in point else 0
-
-            try:
-                angle_config = self.calc_angle_config(r, theta, h, roll_angle=roll_angle)
-                angle_configs.append(self.to_servo_angels(angle_config))
-            except ValueError as e:
-                raise ValueError(f"Calibration program line {line_num}: {e}") from e
-
-        return angle_configs
