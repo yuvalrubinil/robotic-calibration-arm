@@ -8,6 +8,12 @@ REQUEST_TIMEOUT = 2  # sec
 BASE_URL = "http://{}:{}".format(ARM_JETSON_IP, ARM_JETSON_PORT)
 
 
+def set_arm_jetson_ip(ip):
+    global ARM_JETSON_IP, BASE_URL
+    ARM_JETSON_IP = ip
+    BASE_URL = "http://{}:{}".format(ARM_JETSON_IP, ARM_JETSON_PORT)
+
+
 def post_request(path, error_label, **kwargs):
     try:
         response = requests.post(BASE_URL + path, timeout=REQUEST_TIMEOUT, **kwargs)
@@ -43,8 +49,4 @@ def send_calibration_done(success, calib_error):
 
 
 def send_start(side):
-    """Tell the arm Jetson to start the smart calibration walk.
-
-    side must be 'left' or 'right', selecting which camera lens to calibrate for.
-    """
     post("/start", "start command", json={"side": side})

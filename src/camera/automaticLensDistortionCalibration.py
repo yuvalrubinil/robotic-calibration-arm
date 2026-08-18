@@ -303,7 +303,10 @@ if __name__ == "__main__":
     # read args
     parser = argparse.ArgumentParser(description='Calibrate camera')
     parser.add_argument('--side', type=str, default="left", help='Side of the camera')
+    parser.add_argument('--arm-jetson-ip', type=str, default=calibrartion_arm_client.ARM_JETSON_IP, help='IP address of the arm Jetson')
     args = parser.parse_args()
+
+    calibrartion_arm_client.set_arm_jetson_ip(args.arm_jetson_ip)
 
     #test()
 

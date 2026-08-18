@@ -25,11 +25,13 @@ shared_status = status_manager.dict(value=None)
 def wait_frame_status(shared_status, timeout=STATUS_TIMEOUT_SECONDS):
     shared_status["value"] = None
     deadline = time.time() + timeout
+
     while time.time() < deadline:
         status = shared_status["value"]
         if status is not None and status.get("type") == "frame":
             return status
         time.sleep(STATUS_POLL_INTERVAL_SECONDS)
+        
     raise TimeoutError(f"Status not received within {timeout}s")
 
 
@@ -39,19 +41,17 @@ def calibrate(side, shared_status):
 
     try:
         arm.reset()
-        r, a, h = arm_director.first_target()
+        r, a, h = arm_director.first_position()
         while not arm_director.done:
             arm.move_to(r, a, h)
 
             status = wait_frame_status(shared_status)
-            r, a, h = arm_director.next_target(
-                found=status.get("found"),
-                corners=status.get("corners"),
-                frame_size=status.get("frame_size"),
-                cover=status.get("cover"),
-            )
+
+            found, corners, frame_size, cover = status.get("found"), status.get("corners"), status.get("frame_size"), status.get("cover")
+            r, a, h = arm_director.next_target(found, corners, frame_size, cover)
+
     except TimeoutError as e:
-        print(f"Aborting calibration walk: {e}")
+        print(f"Aborting calibration: {e}")
     finally:
         arm.reset()
 
