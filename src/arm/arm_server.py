@@ -48,7 +48,7 @@ def calibrate(side, shared_status):
             status = wait_frame_status(shared_status)
 
             found, corners, frame_size, cover = status.get("found"), status.get("corners"), status.get("frame_size"), status.get("cover")
-            r, a, h = arm_director.next_target(found, corners, frame_size, cover)
+            r, a, h = arm_director.next_position(found, corners, frame_size, cover)
 
     except TimeoutError as e:
         print(f"Aborting calibration: {e}")
