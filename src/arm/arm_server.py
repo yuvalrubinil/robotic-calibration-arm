@@ -21,16 +21,16 @@ status_manager = multiprocessing.Manager()
 shared_status = status_manager.dict(value=None)
 
 
-def wait_frame_status(shared_status, timeout=STATUS_TIMEOUT_SECONDS):
+def wait_status(shared_status, timeout=STATUS_TIMEOUT_SECONDS):
     shared_status["value"] = None
     deadline = time.time() + timeout
 
     while time.time() < deadline:
         status = shared_status["value"]
-        if status is not None and status.get("type") == "frame":
+        if status is not None and status.get("type") in ("frame", "calibration_done"):
             return status
         time.sleep(STATUS_POLL_INTERVAL_SECONDS)
-        
+
     raise TimeoutError(f"Status not received within {timeout}s")
 
 
@@ -41,10 +41,14 @@ def calibrate(side, shared_status):
     try:
         arm.reset()
         r, a, h, ro = arm_director.r, arm_director.a, arm_director.h, arm_director.ro
-        while not arm_director.done:
+        while True:
             arm.move_to(r, a, h, ro)
 
-            status = wait_frame_status(shared_status)
+            status = wait_status(shared_status)
+            if status.get("type") == "calibration_done":
+                print(f"Calibration finished (success={status.get('success')}, error={status.get('calib_error')})")
+                break
+
             found, corners, frame_size, cover = status.get("found"), status.get("corners"), status.get("frame_size"), status.get("cover")
 
             r, a, h, ro = arm_director.next_position(found, corners, frame_size, cover)

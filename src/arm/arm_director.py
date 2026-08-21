@@ -20,6 +20,7 @@ class ArmDirector:
         self.target_edge = 'right'  # should be based on dh da (change later)
 
         self.final_rotations = director_config["final_rotations"]
+        self.rotation_idx = 0
 
         self.padding_pct = director_config["padding_pct"]
         self.cover_target_pct = director_config["cover_target_pct"]
@@ -27,8 +28,6 @@ class ArmDirector:
         self.lost_streak = 0
 
         self.steps = 0
-
-        self.done = False
 
     def padding_ratio(self, edge, corners, frame_size):
         axis = 0 if edge == 'left' or edge == 'right' else 1
@@ -112,9 +111,6 @@ class ArmDirector:
             self.set_mumentum(self.target_edge, self.deceleration(target_padding_ratio))
 
         da, dh = self.mumentm_a + nudge_a, self.mumentm_h + nudge_h
-        if corners:
-            print(self.padding_ratio('right', corners, frame_size))
-            print(da)
         return da, dh
 
 
@@ -137,13 +133,11 @@ class ArmDirector:
             self.a += da
             self.h += dh
 
-        elif self.steps < 40:
+        else:
             self.a = self.a0
             self.h = self.h0
-            self.ro = self.final_rotations.pop()
-
-        else: 
-            self.done = True
+            self.ro = self.final_rotations[self.rotation_idx % len(self.final_rotations)]
+            self.rotation_idx += 1
 
         self.steps += 1
         return self.r, self.a, self.h, self.ro
