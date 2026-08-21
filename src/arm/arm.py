@@ -3,6 +3,7 @@ import time
 from adafruit_servokit import ServoKit
 from servo import Servo
 from ik_compiler import IKCompiler
+from arm_director import ArmDirector
 
 
 class Arm:
@@ -12,16 +13,16 @@ class Arm:
 
         # load arm_config
         with open(arm_config, "r") as f:
-            config = json.load(f)
+            self.config = json.load(f)
 
         # init the inverse kinematics compiler
-        self.ikc = IKCompiler(config)
+        self.ikc = IKCompiler(self.config)
 
         # resting position
-        self.zero_state = config["arm"]["zero_state"]
+        self.zero_state = self.config["arm"]["zero_state"]
 
         # init servos
-        servo_config = config["arm"]["servos"]
+        servo_config = self.config["arm"]["servos"]
         servo_types = servo_config["types"]
         self.servos = []
         for channel_str, _ in servo_config.items():
@@ -35,6 +36,9 @@ class Arm:
                 servo_config={**servo_config[channel_str], "type_config": servo_types[servo_config[channel_str]["type"]]}
             )
             self.servos.append(servo)
+
+    def arm_director(self):
+        return ArmDirector(self.config)
 
     def set_angle_config(self, angle_config):
         for idx, angle in enumerate(angle_config):

@@ -6,7 +6,6 @@ from pathlib import Path
 from flask import Flask, jsonify, request
 
 from arm import Arm
-from arm_director import ArmDirector
 
 ARM_CONFIG = Path(__file__).parent / "config.json"
 
@@ -37,18 +36,18 @@ def wait_frame_status(shared_status, timeout=STATUS_TIMEOUT_SECONDS):
 
 def calibrate(side, shared_status):
     arm.ikc.set_lens(side)
-    arm_director = ArmDirector()
+    arm_director = arm.arm_director()
 
     try:
         arm.reset()
-        r, a, h = arm_director.first_position()
+        r, a, h, ro = arm_director.r, arm_director.a, arm_director.h, arm_director.ro
         while not arm_director.done:
-            arm.move_to(r, a, h)
+            arm.move_to(r, a, h, ro)
 
             status = wait_frame_status(shared_status)
-
             found, corners, frame_size, cover = status.get("found"), status.get("corners"), status.get("frame_size"), status.get("cover")
-            r, a, h = arm_director.next_position(found, corners, frame_size, cover)
+
+            r, a, h, ro = arm_director.next_position(found, corners, frame_size, cover)
 
     except TimeoutError as e:
         print(f"Aborting calibration: {e}")

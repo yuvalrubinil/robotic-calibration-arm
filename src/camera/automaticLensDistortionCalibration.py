@@ -17,10 +17,14 @@ max_calibration_error = 0.06
 
 @app.route('/left')
 def video_feed_left():
+    # tell the arm Jetson to start the smart calibration walk for this side
+    calibrartion_arm_client.send_start('left')
     return Response(calibrate_camera('left'), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/right')
 def video_feed_right():
+    # tell the arm Jetson to start the smart calibration walk for this side
+    calibrartion_arm_client.send_start('right')
     return Response(calibrate_camera('right'), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # change working directory to script directory
@@ -302,7 +306,7 @@ if __name__ == "__main__":
 
     # read args
     parser = argparse.ArgumentParser(description='Calibrate camera')
-    parser.add_argument('--side', type=str, default="left", help='Side of the camera')
+    parser.add_argument('--port', type=int, default=5002, help='Port to serve the dynamic lens calibration Flask app on')
     parser.add_argument('--arm-jetson-ip', type=str, default=calibrartion_arm_client.ARM_JETSON_IP, help='IP address of the arm Jetson')
     args = parser.parse_args()
 
@@ -310,10 +314,11 @@ if __name__ == "__main__":
 
     #test()
 
-    # tell the arm Jetson to start the smart calibration walk
-    calibrartion_arm_client.send_start(args.side)
+    # side is picked per-request by which route (/left or /right) is hit,
+    # and the arm "start" command is sent from there so one running instance
+    # correctly serves both sides.
 
-    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=args.port, debug=True, threaded=True, use_reloader=False)
 
     # sleep 1 second
     time.sleep(1)

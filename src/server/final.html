@@ -34,14 +34,15 @@
                     
                         <div>
                             <input type="checkbox" id="left_lens_calibration" name="left_lens_calibration" checked  onchange="this.form.submit()">
-            
-                            
+
+
                                 <button type="button" onclick="startOperation('left_lens_calibration')">Left Lens Calibration</button>
-                            
+                                <button type="button" onclick="startOperation('left_lens_calibration_auto')">Left Lens Calibration (Auto)</button>
+
 
                             <label for="left_lens_calibration"></label>
                         </div>
-                    
+
                         <div>
                             <input type="checkbox" id="left_ledstrip" name="left_ledstrip" checked  onchange="this.form.submit()">
             
@@ -78,14 +79,15 @@
                     
                         <div>
                             <input type="checkbox" id="right_lens_calibration" name="right_lens_calibration" checked  onchange="this.form.submit()">
-            
-                            
+
+
                                 <button type="button" onclick="startOperation('right_lens_calibration')">Right Lens Calibration</button>
-                            
-                            
+                                <button type="button" onclick="startOperation('right_lens_calibration_auto')">Right Lens Calibration (Auto)</button>
+
+
                             <label for="right_lens_calibration"></label>
                         </div>
-                    
+
                         <div>
                             <input type="checkbox" id="right_ledstrip" name="right_ledstrip" checked  onchange="this.form.submit()">
             
@@ -262,7 +264,12 @@
         // Via proxy: use /lens/... path on same origin
         // Direct: use port 5000 directly
         var lensBase = isViaProxy ? window.location.origin + '/lens' : 'http://' + window.location.hostname + ':5000';
-        
+
+        // For the automatic (arm-driven) lens calibration service, which runs
+        // alongside the manual one above on a separate port. Fixed IP for now -
+        // opened in a new window rather than navigating this page away.
+        var autoLensBase = 'http://192.168.1.218:5002';
+
         // For redirects back to CameraServer (port 80)
         // Via proxy: same origin
         // Direct: need to specify port 80 explicitly (or default)
@@ -370,6 +377,12 @@
             else if(item == 'right_lens_calibration'){
                 fetch(mainServerBase + "/lens_calibration");
                 location.href = lensBase + "/right";
+            }
+            else if(item == 'left_lens_calibration_auto'){
+                window.open(autoLensBase + "/left", '_blank');
+            }
+            else if(item == 'right_lens_calibration_auto'){
+                window.open(autoLensBase + "/right", '_blank');
             }
             else if(item == 'fan_5' || item == 'fan_100' || item == 'fan_auto'){
                 fetch(pathPrefix + '/start_operation', {
