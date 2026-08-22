@@ -68,10 +68,8 @@
             "ro0": 0,
             "da": -10,
             "dh": 3,
-            "rotations": [0, 8, -8, 12, -12],
-            "padding_pct": 7,
-            "cover_target_pct": 77,
-            "max_lost_frames": 3
+            "rotations": [0, 4, -4, 8, -8, 12, -12],
+            "padding_pct": 7
         }
     },
     "camera": {

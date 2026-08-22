@@ -23,8 +23,6 @@ class ArmDirector:
         self.rotation_idx = 0
 
         self.padding_pct = director_config["padding_pct"]
-        self.cover_target_pct = director_config["cover_target_pct"]
-        self.max_lost_frames = director_config["max_lost_frames"]
         self.lost_streak = 0
 
     def padding_ratio(self, edge, corners, frame_size):
@@ -115,21 +113,16 @@ class ArmDirector:
         self.ro = self.rotations[self.rotation_idx % len(self.rotations)]
         self.rotation_idx += 1
 
-        if cover < self.cover_target_pct:
-            edges = self.edges_hit(corners, frame_size)
+        edges = self.edges_hit(corners, frame_size)
 
-            if not found and not edges:
-                self.lost_streak += 1
-                if self.max_lost_frames <= self.lost_streak:
-                    raise ValueError("Board should be visible - probably lighting issue")
-            else:
-                self.lost_streak = 0
-                da, dh = self.delta_position(edges, corners, frame_size)
-                self.a += da
-                self.h += dh
-
+        if not found and not edges:
+            self.lost_streak += 1
+            if len(self.rotations) < self.lost_streak:
+                raise ValueError("Board should be visible - probably lighting issue")
         else:
-            self.a = self.a0
-            self.h = self.h0
+            self.lost_streak = 0
+            da, dh = self.delta_position(edges, corners, frame_size)
+            self.a += da
+            self.h += dh
 
         return self.r, self.a, self.h, self.ro
