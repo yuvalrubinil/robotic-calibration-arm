@@ -19,15 +19,13 @@ class ArmDirector:
         self.mumentm_h = 0
         self.target_edge = 'right'  # should be based on dh da (change later)
 
-        self.final_rotations = director_config["final_rotations"]
+        self.rotations = director_config["rotations"]
         self.rotation_idx = 0
 
         self.padding_pct = director_config["padding_pct"]
         self.cover_target_pct = director_config["cover_target_pct"]
         self.max_lost_frames = director_config["max_lost_frames"]
         self.lost_streak = 0
-
-        self.steps = 0
 
     def padding_ratio(self, edge, corners, frame_size):
         axis = 0 if edge == 'left' or edge == 'right' else 1
@@ -45,15 +43,13 @@ class ArmDirector:
         return _padding_ratio <= self.padding_pct / 100.0
 
     def edges_hit(self, corners, frame_size):
-        if not corners:
-            return None
-
         _edges_hit = []
-        
-        for edge in ['right', 'up', 'left', 'down']:
-            _padding_ratio = self.padding_ratio(edge, corners, frame_size)
-            if self.hit_edge(_padding_ratio):
-                _edges_hit.append(edge)
+
+        if corners:
+            for edge in ['right', 'up', 'left', 'down']:
+                _padding_ratio = self.padding_ratio(edge, corners, frame_size)
+                if self.hit_edge(_padding_ratio):
+                    _edges_hit.append(edge)
 
         return _edges_hit
 
@@ -116,10 +112,10 @@ class ArmDirector:
 
 
     def next_position(self, found, corners, frame_size, cover):
-        if not self.steps:
-            pass
+        self.ro = self.rotations[self.rotation_idx % len(self.rotations)]
+        self.rotation_idx += 1
 
-        elif cover < self.cover_target_pct:
+        if cover < self.cover_target_pct:
             edges = self.edges_hit(corners, frame_size)
 
             if not found and not edges:
@@ -128,16 +124,12 @@ class ArmDirector:
                     raise ValueError("Board should be visible - probably lighting issue")
             else:
                 self.lost_streak = 0
-
-            da, dh = self.delta_position(edges or [], corners, frame_size)
-            self.a += da
-            self.h += dh
+                da, dh = self.delta_position(edges, corners, frame_size)
+                self.a += da
+                self.h += dh
 
         else:
             self.a = self.a0
             self.h = self.h0
-            self.ro = self.final_rotations[self.rotation_idx % len(self.final_rotations)]
-            self.rotation_idx += 1
 
-        self.steps += 1
         return self.r, self.a, self.h, self.ro

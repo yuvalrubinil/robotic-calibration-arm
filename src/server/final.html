@@ -265,10 +265,11 @@
         // Direct: use port 5000 directly
         var lensBase = isViaProxy ? window.location.origin + '/lens' : 'http://' + window.location.hostname + ':5000';
 
-        // For the automatic (arm-driven) lens calibration service, which runs
-        // alongside the manual one above on a separate port. Fixed IP for now -
-        // opened in a new window rather than navigating this page away.
-        var autoLensBase = 'http://192.168.1.218:5002';
+        // For the automatic (arm-driven) lens calibration service
+        // (automaticLensDistortionCalibration.py), which drives the arm and
+        // camera itself. Fixed IP for now - opened in a new window rather
+        // than navigating this page away.
+        var autoLensBase = 'http://192.168.1.218:5000';
 
         // For redirects back to CameraServer (port 80)
         // Via proxy: same origin

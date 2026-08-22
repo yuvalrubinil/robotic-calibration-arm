@@ -58,7 +58,7 @@
             "wrist_arm": 7,
             "L3": 2.5,
             "L2": 1.65,
-            "L1": 5
+            "L1": 7
         },
         "zero_state": [140, 270, 200, 100, 90, 90],
         "director": {
@@ -68,8 +68,8 @@
             "ro0": 0,
             "da": -10,
             "dh": 3,
-            "final_rotations": [0, 10, -10, 13, -13],
-            "padding_pct": 5,
+            "rotations": [0, 8, -8, 12, -12],
+            "padding_pct": 7,
             "cover_target_pct": 77,
             "max_lost_frames": 3
         }

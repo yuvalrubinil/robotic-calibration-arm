@@ -310,7 +310,7 @@ if __name__ == "__main__":
 
     #test()
 
-    # tell the arm Jetson to start the smart calibration walk
+    # tell the arm Jetson to start the calibration
     calibrartion_arm_client.send_start(args.side)
 
     app.run(host='0.0.0.0', port=5000, debug=True, threaded=True, use_reloader=False)
