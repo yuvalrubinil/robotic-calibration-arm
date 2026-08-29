@@ -7,6 +7,10 @@ cd RoboticArm
 source ~/arm-env/bin/activate
 
 
+Baseline0932:
+ssh baseline@192.168.1.241
+
+
 ARM:
  downlaod latest commited code to the jetson (!pay attention to the branch):
  curl -sL https://github.com/yuvalrubinil/robotic-calibration-arm/archive/refs/heads/main.tar.gz | tar -xz --strip-components=3 "robotic-calibration-arm-main/src/arm"
@@ -16,3 +20,13 @@ ARM:
 
  CAMERA: 
  scp /home/yuval-rubin/Projects/robotic-calibration-arm/src/camera/* baseline@192.168.1.218:~/BaselineCrossPlatform/webapp/baselinex
+
+ # Set static IP on the 192.168.1.x subnet
+sudo nmcli con mod "builtin-eth-static6" ipv4.addresses 192.168.1.241/24
+sudo nmcli con mod "builtin-eth-static6" ipv4.method manual
+sudo nmcli con up "builtin-eth-static6"
+
+# Revert back to dynamic assignment and clear static IP
+sudo nmcli con mod "builtin-eth-static6" ipv4.method auto
+sudo nmcli con mod "builtin-eth-static6" ipv4.addresses ""
+sudo nmcli con up "builtin-eth-static6"
