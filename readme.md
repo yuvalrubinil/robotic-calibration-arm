@@ -1,7 +1,6 @@
 # Robotic Calibration Arm
 
-<video src="https://github.com/yuvalrubinil/robotic-calibration-arm/raw/refs/heads/dynamic/figures/robotic_calibration_arm.mp4" controls width="1024" height="576">
-</video>
+<a href="https://github.com/yuvalrubinil/robotic-calibration-arm/raw/refs/heads/dynamic/figures/robotic_calibration_arm.mp4">▶ Watch the robotic calibration arm in action</a>
 
 
 A 6-DOF robotic arm that automates **camera lens-distortion calibration**. Instead of a person waving a checkerboard in front of a camera, the arm holds the checkerboard and sweeps it through the camera's field of view on its own - panning, tilting, and rolling until enough frame coverage has been collected, then triggers the calibration computation.
