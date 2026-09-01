@@ -8,6 +8,7 @@ The system runs across **two Jetson boards** talking to each other over HTTP:
 - **Camera Jetson** - grabs frames, detects the checkerboard, and runs `cv2.calibrateCamera`.
 - **Arm Jetson** - drives the 6 servos and decides where to move next based on what the camera sees.
 
+
 ## Overview
 
 ```mermaid
@@ -27,6 +28,7 @@ sequenceDiagram
     Cam->>Arm: POST /status {type: "calibration_done", success, calib_error}
     Arm->>Arm: reset to resting position
 ```
+
 
 1. The camera side streams video, and every so often runs `findChessboardCorners` on a frame. It tracks the **convex hull area of all corners seen so far** as a percentage of the frame — this is the "cover" metric that decides when enough of the frame has been sampled.
 2. Every frame result (`found`, `corners`, `frame_size`, `cover`) is POSTed to the arm's `/status` endpoint.
