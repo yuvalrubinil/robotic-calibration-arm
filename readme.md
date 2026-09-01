@@ -1,5 +1,8 @@
 # Robotic Calibration Arm
 
+<video src="/home/yuval-rubin/Projects/robotic-calibration-arm/figures/robotic_calibration_arm.mp4" width="1024" height="576" controls></video>
+
+
 A 6-DOF robotic arm that automates **camera lens-distortion calibration**. Instead of a person waving a checkerboard in front of a camera, the arm holds the checkerboard and sweeps it through the camera's field of view on its own - panning, tilting, and rolling until enough frame coverage has been collected, then triggers the calibration computation.
 
 The system runs across **two Jetson boards** talking to each other over HTTP:
@@ -58,7 +61,7 @@ A target is expressed in **polar coordinates around one of the two camera lenses
 4. Derives **wrist tilt** from the shoulder/elbow angles so the mount stays perpendicular to the ground.
 5. `to_servo_angels()` maps these logical joint angles to physical servo angles using each joint's `logical_zero`, and raises if any angle falls outside its configured `operating_range`.
 
-`figures/` contains the geometric derivations behind this math as TikZ diagrams: **[📄 calc_yaw_and_base_angles.pdf](<figures/calc_yaw_and_base_angles().pdf>)** and **[📄 calc_shoulder_and_elbow_angles.pdf](<figures/calc_shoulder_and_elbow_angles().pdf>)**.
+`figures/` contains the geometric derivations behind this math as TikZ diagrams: **[calc_yaw_and_base_angles.pdf](<figures/calc_yaw_and_base_angles().pdf>)** and **[calc_shoulder_and_elbow_angles.pdf](<figures/calc_shoulder_and_elbow_angles().pdf>)**.
 
 ### The calibration walk (`arm_director.py`)
 
@@ -110,7 +113,7 @@ Two endpoints, meant to be called by the camera Jetson:
 | `camera.lenses.left_lens` / `right_lens` | Each lens's position and angle in the arm's coordinate frame |
 
 
-This immediately tells the arm to start the calibration walk for the given side, then serves the MJPEG feed on port 5000.
+This immediately tells the arm to start the calibration walk for the given side.
 
 
 ## Dependencies
