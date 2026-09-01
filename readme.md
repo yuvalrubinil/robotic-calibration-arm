@@ -1,7 +1,7 @@
 # Robotic Calibration Arm
 
 <video width="1024" height="576" controls>
-  <source src="https://github.com/yuvalrubinil/robotic-calibration-arm/raw/refs/heads/dynamic/figures/robotic_calibration_arm.mp4" type="video/mp4">
+  <source src="https://media.githubusercontent.com/media/yuvalrubinil/robotic-calibration-arm/dynamic/figures/robotic_calibration_arm.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 
