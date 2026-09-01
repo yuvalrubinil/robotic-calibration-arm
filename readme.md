@@ -1,5 +1,6 @@
 # Robotic Calibration Arm
 
+<a href="https://youtube.com/shorts/9PEGZUqVP_8?feature=share"> Watch the robotic calibration arm in action</a>
 
 A 6-DOF robotic arm that automates **camera lens-distortion calibration**. Instead of a person waving a checkerboard in front of a camera, the arm holds the checkerboard and sweeps it through the camera's field of view on its own - panning, tilting, and rolling until enough frame coverage has been collected, then triggers the calibration computation.
 
